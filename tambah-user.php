@@ -112,7 +112,7 @@ session_start();
                 $userUsername = isset($_POST['userUsername']) ? trim($_POST['userUsername']) : '';
                 $userPassword = isset($_POST['userPassword']) ? trim($_POST['userPassword']) : '';
                 $userRePassword = isset($_POST['userRePassword']) ? trim($_POST['userRePassword']) : '';
-                $userCabang = isset($_POST['userCabang']) ? trim(_POST['userCabang']) : '';
+                $userCabang = isset($_POST['userCabang']) ? trim($_POST['userCabang']) : '';
                 
 
                 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -157,15 +157,6 @@ session_start();
                         if (!is_numeric($userTelp)){
                             $telpErr = "No Telp / No Handphone harus berupa angka";
                             $isError = true;
-                        } else {
-                            if(strlen($userTelp) < 9) {
-                                $telpErr = "No Telp / No Handphone tidak boleh kurang dari 9 karakter";
-                                $isError = true;
-                            }
-                            else if(strlen($userTelp) > 12 ) {
-                                $telpErr = "No Telp / No Handphone tidak boleh lebih dari 12 karakter";
-                                $isError = true;
-                            }
                         }
                     }
 
@@ -197,27 +188,34 @@ session_start();
                                 } else {
                                     $passwordMd5 = md5($userPassword);
                                     $sql = "INSERT INTO db_user (name, id_cabang, email, telp, username, password, status, created_at, updated_at) "
-                                         . "VALUES ('$userName', '$userCabang', '$userEmail', '$userTelp', '$userUsername', '$passwordMd5',  '0', now(), now())";
-
+                                         . "VALUES ('$userName', '$userCabang', '$userEmail', '$userTelp', '$userUsername', '$passwordMd5',  '1', now(), now())";
+                                    //echo $sql; exit;
                                     $con->query($sql);
-
-                                    $userUsername = '';
-                                    $userPassword = '';
-
-                                    $succeed = true;
-                                }
-                                
-                                if ($succeed) {
+                                    $last_id = $con->insert_id;
+                                    
                                     $userName = '';
                                     $userEmail = '';
                                     $userTelp = '';
                                     $userUsername = '';
                                     $userPassword = '';
                                     $userRePassword = '';  
+                              
                                     echo "<script>";
-                                
-                                    echo "swal('Berhasil menambahkan user baru')";
-
+                                    echo "swal({";
+                                    echo "    title: 'Berhasil menambahkan user baru, Silahkan atur hak akses untuk user ini.',";
+                                    echo "    type: 'success',";
+                                    echo "    showCancelButton: false,";
+                                    echo "    confirmButtonColor: 'Black',";
+                                    echo "    confirmButtonText: 'Ya',";
+                                    echo "    cancelButtonText: 'Tidak',";
+                                    echo "    closeOnConfirm: false,";
+                                    echo "    closeOnCancel: true";
+                                    echo "},";
+                                    echo "function (isConfirm) {";
+                                    echo "    if (isConfirm) {";
+                                    echo "        window.location.href = 'detail-user?k=".$last_id."';";
+                                    echo "    }";
+                                    echo "});";
                                     echo "</script>";
                                 }
                             } catch (Exception $ex) {

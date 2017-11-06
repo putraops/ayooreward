@@ -21,6 +21,7 @@ $sql_status = "SELECT h.id as id,
         WHERE  h.id_reward = '$id' 
         ORDER BY h.created_at DESC";
 
+//echo $sql_status; exit;
 
 $resultstatus = $con->query($sql_status);
 
@@ -79,12 +80,12 @@ if ($result->num_rows > 0) {
         ## GET LAST STATUS
         $data = [
             'id' => $row['id'],
-            'idstatus' => $row['status'],
-            'namastatus' => $row['statusnama'],
+            'idstatus' => "1",
+            'namastatus' => "New Reward",
             'tanggalbuat' => $row['created_at'],
             'namapengubah' => $row['namapengubah'],
         ];
-
+        //print_r($data);exit;
         array_push($arrStatus, $data);
         
         
