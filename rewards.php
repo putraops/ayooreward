@@ -381,8 +381,6 @@
         <div id="page-wrapper">
             <div class="container-fluid" style="margin-bottom: 30px;">
                 <!-- Page Heading -->
-                
-                <!-- Page Heading -->
                 <div class="row" style="margin-top: -30px;">
                     <div class="col-lg-12">
                         <h1 class="page-header">
