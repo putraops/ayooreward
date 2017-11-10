@@ -114,6 +114,7 @@ session_start();
                         $tanggalBuatRewardErr = $tanggalTagihanRewardErr = $documentReferralErr = $jenisRewardErr = $keteranganRewardErr = $vendorRewardErr = "";
                         $quartalRewardErr = "";
                         $contactPersonRewardErr = "";
+                        $valuecabangreward = 0;
 
                         $id = $_GET['q'];
                         $sql = "Select dbv.kode as kodevendor, 
@@ -122,6 +123,7 @@ session_start();
                                 dbr.id as id,
                                 dbr.no_po as nopo,
                                 dbr.quartal as quartal,
+                                dbr.id_cabang as idcabang,
                                 dbr.keterangan_reward as keterangan_reward, 
                                 dbr.tanggal_buat as tanggalbuat, 
                                 dbr.tanggal_selesai as tanggalselesai, 
@@ -163,6 +165,12 @@ session_start();
                                 $vendorTelpCP = $row['telp_cp'];
                                 
                                 $contactPersonReward = $row['dbcpid'];
+                                
+                                if ($jabatanUserLogin == "user") {
+                                    $valuecabangreward = $cabangUserLogin;
+                                } else {
+                                    $valuecabangreward = $row['idcabang'];
+                                }
                             }
                         } else {
                             echo "<script>";
@@ -194,7 +202,13 @@ session_start();
                             $vendorTelpCP = isset($_POST['vendorTelpCP']) ? $_POST['vendorTelpCP'] : '';
                             
                             $contactPersonReward = isset($_POST['contactPersonReward']) ? $_POST['contactPersonReward'] : '0';
-
+                            
+                            if ($jabatanUserLogin == "user") {
+                                $valuecabangreward = $cabangUserLogin;
+                            } else {
+                                $valuecabangreward = isset($_POST['cabangReward']) ? $_POST['cabangReward'] : '0';
+                            }
+                            
                             if (!$tanggalBuatReward) {
                                 $tanggalBuatRewardErr = "Tanggal buat reward tidak boleh kosong";
                                 $isError = true;
@@ -236,6 +250,7 @@ session_start();
 
                                 $sql = "UPDATE db_rewards SET
                                         id_jenis_reward = '$jenisReward', 
+                                        id_cabang = '$valuecabangreward', 
                                         keterangan_reward = '$keteranganReward',
                                         kode_vendor = '$vendorReward',
                                         no_po = '$documentReferral',
@@ -311,6 +326,30 @@ session_start();
                             </div>
                             <div class="panel-body">
                                 <form role="form" method="post" action="edit-reward?q=<?php echo $id; ?>" style="">
+                                    <?php if ($jabatanUserLogin == "admin"): ?>
+                                    <div class="form-group col-md-12">
+                                        <label>Cabang</label>
+                                        <select id="cabangReward" name="cabangReward" onchange="removeError(this.id)">
+                                            <option value="0" <?php echo $valuecabangreward == "0" ? "selected" : ""; ?>>Semua Cabang</option>
+                                            <?php
+                                            require './connection.php';
+
+                                            $sql = "SELECT id, nama, created_at, updated_at FROM db_cabang Where status > 0 order by nama ASC;";
+
+                                            $result = $con->query($sql);
+                                            if ($result->num_rows > 0) {
+                                                // output data of each row
+                                                $selected = "";
+                                                while ($row = $result->fetch_assoc()) {
+                                                    $row['id'] == $valuecabangreward ? $selected = "selected" : $selected = "";
+                                                    echo "<option " . $selected . " value='" . $row['id'] . "'>" . $row['nama'] . "</option>";
+                                                }
+                                            }
+                                            mysqli_close($con);
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <?php endif;?>
                                     <div class="form-group col-md-4">
                                         <label>Nama Reward</label>
                                         <input class="form-control siku" id="inp_nopo" name="documentReferral" value="<?php echo $documentReferral; ?>" onkeyup="removeError(this.id)" placeholder="Document Referral">

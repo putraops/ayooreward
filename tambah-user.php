@@ -150,15 +150,15 @@ session_start();
                         }
                     }
                     
-                    if (!$userTelp) {
-                        $telpErr = "Kolom No Telp / No Handphone tidak boleh kosong";
-                        $isError = true;
-                    } else {
-                        if (!is_numeric($userTelp)){
-                            $telpErr = "No Telp / No Handphone harus berupa angka";
-                            $isError = true;
-                        }
-                    }
+//                    if (!$userTelp) {
+//                        $telpErr = "Kolom No Telp / No Handphone tidak boleh kosong";
+//                        $isError = true;
+//                    } else {
+//                        if (!is_numeric($userTelp)){
+//                            $telpErr = "No Telp / No Handphone harus berupa angka";
+//                            $isError = true;
+//                        }
+//                    }
 
                     if (!$userPassword) {
                         $passwordErr = "Kolom Password tidak boleh kosong";

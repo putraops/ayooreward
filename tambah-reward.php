@@ -103,6 +103,15 @@ session_start();
                 <div class="col-md-8">
                         <?php
                         require './connection.php';
+                    
+                        //echo $jabatanUserLogin;
+                        //echo $cabangUserLogin;
+        
+                        $valuecabangreward = 0;
+                        
+                        //echo $cabangUserLogin;
+                        //echo $tempcabangreward;
+        
                         $isError = false;
                         $succeed = false;
                         $last_id;
@@ -120,6 +129,12 @@ session_start();
                         //preg_replace( "/\r|\n/", "", $yourString );
                         $keteranganReward = isset($_POST['keteranganReward']) ? preg_replace("/\r|\n/", "", nl2br($_POST['keteranganReward'])) : "";
                         $keteranganReward = htmlspecialchars($keteranganReward , ENT_QUOTES);
+                        
+                        if ($jabatanUserLogin == "user") {
+                            $valuecabangreward = $cabangUserLogin;
+                        } else {
+                            $valuecabangreward = isset($_POST['cabangReward']) ? $_POST['cabangReward'] : '0';
+                        }
                         
                         //$keteranganReward = str_replace('"', '&#34;', $keteranganReward);
                         //$keteranganReward = str_replace('"', '&#34;', $keteranganReward);
@@ -185,15 +200,15 @@ session_start();
                                     $memoReward = "-";
                                 }
                                 
-                                $sql = "INSERT INTO db_rewards (id_user, kode_vendor, id_jenis_reward, id_contactperson, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
-                                 . "VALUES ('$kodeLogin', '$vendorReward', '$jenisReward', '$contactPersonReward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
+                                $sql = "INSERT INTO db_rewards (id_user, kode_vendor, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
+                                 . "VALUES ('$kodeLogin', '$vendorReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
                                 
                                 if ($con->query($sql) === TRUE) {
                                     $last_id = $con->insert_id;
                                 } 
                                 
-                                $sql = "INSERT INTO db_rewards_history (id_user, id_reward, kode_vendor, id_jenis_reward, id_contactperson, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
-                                 . "VALUES ('$kodeLogin', '$last_id', '$vendorReward', '$jenisReward', '$contactPersonReward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
+                                $sql = "INSERT INTO db_rewards_history (id_user, id_reward, kode_vendor, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
+                                 . "VALUES ('$kodeLogin', '$last_id', '$vendorReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
                                 
                                 
                                 $con->query($sql);
@@ -237,6 +252,30 @@ session_start();
                         </div>
                         <div class="panel-body">
                             <form class="row" role="form" method="post" action="tambah-reward" style="">
+                                <?php if ($jabatanUserLogin == "admin"): ?>
+                                <div class="form-group col-md-12">
+                                    <label>Cabang</label>
+                                    <select id="cabangReward" name="cabangReward" onchange="removeError(this.id)">
+                                        <option value="0" <?php echo $valuecabangreward == "0" ? "selected" : ""; ?>>Semua Cabang</option>
+                                        <?php
+                                        require './connection.php';
+
+                                        $sql = "SELECT id, nama, created_at, updated_at FROM db_cabang Where status > 0 order by nama ASC;";
+
+                                        $result = $con->query($sql);
+                                        if ($result->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $result->fetch_assoc()) {
+                                                $row['id'] == $valuecabangreward ? $selected = "selected" : $selected = "";
+                                                echo "<option " . $selected . " value='" . $row['id'] . "'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        mysqli_close($con);
+                                        ?>
+                                    </select>
+                                </div>
+                                <?php endif;?>
                                 <div class="form-group col-md-4">
                                     <label>Nama Reward</label>
                                     <input class="form-control siku" id="inp_nopo" name="documentReferral" value="<?php echo $documentReferral; ?>" onkeyup="removeError(this.id)" placeholder="Nama Reward">
@@ -384,45 +423,7 @@ session_start();
                                             echo "<i class=\"validation-text\" id=\"val-contactPersonReward\">" . $contactPersonRewardErr . "</i>";
                                         }
                                     ?>
-                                </div>
-                                
-<!--                                <div class="col-md-12">
-                                    <label>Kontak Person</label>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Nama</label>
-                                        <input class="form-control" name="vendorNamaCP" id="vendorNamaCP" onkeyup="removeError(this.id)" placeholder="Nama Kontak Person" value="<?php echo $vendorNamaCP; ?>">
-                                        <?php
-                                            if ($namaCPErr) {
-                                                echo "<i class=\"validation-text\" id=\"val-vendorNamaCP\">" . $namaCPErr . "</i>";
-                                            }
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Email</label>
-                                        <input class="form-control" name="vendorEmailCP" id="vendorEmailCP" onkeyup="removeError(this.id)" placeholder="Email Kontak Person" value="<?php echo $vendorEmailCP; ?>">
-                                        <?php
-                                            if ($emailCPErr) {
-                                                echo "<i class=\"validation-text\" id=\"val-vendorEmailCP\">" . $emailCPErr . "</i>";
-                                            }
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>No Hp</label>
-                                        <input class="form-control" name="vendorTelpCP" id="vendorTelpCP" onkeyup="removeError(this.id)" placeholder="No Hp Kontak Person" value="<?php echo $vendorTelpCP; ?>">
-                                        <?php
-                                            if ($telpCPErr) {
-                                                echo "<i class=\"validation-text\" id=\"val-vendorTelpCP\">" . $telpCPErr . "</i>";
-                                            }
-                                        ?>
-                                    </div>
-                                </div>-->
-                                
+                                </div>                                
                                 <div class="form-group col-md-12" style="margin-top: 0px;">
                                     <button type="submit" class="btn btn-primary siku full-width" name="submit" ><i class="fa fa-save"> </i> Simpan</button>
                                 </div>
@@ -555,7 +556,7 @@ session_start();
     
     <script type="text/javascript">
         $('select').select2();
-    </script>
+    </script>  
     
     
     <script type="text/javascript">

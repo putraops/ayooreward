@@ -213,7 +213,7 @@
                  INNER JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
                  INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward 
                  LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson ";
-        $sql .=  "LEFT JOIN db_cabang c ON c.id = dbu.id_cabang ";
+        $sql .=  "LEFT JOIN db_cabang c ON c.id = dbr.id_cabang ";
         $sql .=  "WHERE dbr.isDelete = 0 AND dbs.isDelete = 0 ";
         
         
@@ -231,14 +231,15 @@
             $sql .= "and dbr.quartal = '$quartalReward' ";
         }
         if ($cabangreward && $cabangreward != "0") {
-            $sql .= "and dbu.id_cabang = '$cabangreward' ";
+            $sql .= "and dbr.id_cabang = '$cabangreward' ";
         }
         
+        //        echo $cabangUserLogin;exit;
         if ($jabatanUserLogin == "admin") {
             ## Do Nothing
         } else {
             if ($cabangUserLogin != "0") {
-                $sql .= "and dbu.id_cabang = '$cabangUserLogin' ";
+                $sql .= "and dbr.id_cabang = '$cabangUserLogin' ";
             }
         }
         
