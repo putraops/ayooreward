@@ -160,47 +160,62 @@ session_start();
                                 ?>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>PILIH CABANG : </label>
-                            <select id="cabang-laporan" name="userCabang" onchange="removeError(this.id)" style="padding: 5px;">
-                                <option value="0">Semua Cabang</option>
-                                <?php
-                                require './connection.php';
+                        
+                        <?php if ($jabatanUserLogin == "admin" || $cabangUserLogin == "0") :?>
+                        
+                            <div class="form-group">
+                                <label>PILIH CABANG : </label>
+                                <select id="cabang-laporan" name="userCabang" onchange="removeError(this.id)" style="padding: 5px;">
+                                    <option value="0">Semua Cabang</option>
+                                    <?php
+                                    require './connection.php';
 
-                                $sql = "SELECT id, nama, created_at, updated_at FROM db_cabang Where status > 0 order by nama ASC;";
+                                    $sql = "SELECT id, nama, created_at, updated_at FROM db_cabang Where status > 0 order by nama ASC;";
 
-                                $result = $con->query($sql);
-                                if ($result->num_rows > 0) {
-                                    // output data of each row
-                                    $selected = "";
-                                    while ($row = $result->fetch_assoc()) {
-                                        $row['id'] == $is_cabang ? $selected = "selected" : $selected = "";
-                                        echo "<option " . $selected . " value='" . $row['id'] . "'>" . $row['nama'] . "</option>";
+                                    $result = $con->query($sql);
+                                    if ($result->num_rows > 0) {
+                                        // output data of each row
+                                        $selected = "";
+                                        while ($row = $result->fetch_assoc()) {
+                                            $row['id'] == $is_cabang ? $selected = "selected" : $selected = "";
+                                            echo "<option " . $selected . " value='" . $row['id'] . "'>" . $row['nama'] . "</option>";
+                                        }
                                     }
-                                }
-                                mysqli_close($con);
-                                ?>
-                            </select>
-                            <?php
-                            if ($cabangErr) {
-                                echo "<i class=\"validation-text\" id=\"val-userCabang\">" . $cabangErr . "</i>";
-                            }
-                            ?>
-                        </div>
+                                    mysqli_close($con);
+                                    ?>
+                                </select>
+                            </div>
+                        
+<!--                            <div class="form-group">
+                                <label>Cabang: </label>
+                                <select id="cabangReward" name="cabangReward" onchange="removeError(this.id)" style="padding: 8px;">
+                                    <option value="0">Semua Cabang</option>
+                                    <?php
+                                    //require './connection.php';
+//                                    $sql = "SELECT id, nama, created_at, updated_at FROM db_cabang Where status != 0 order by nama ASC;";                            
+//
+//                                    $result = $con->query($sql);
+//                                    if ($result->num_rows > 0) {
+//                                        // output data of each row
+//                                        $selected = "";
+//                                        while ($row = $result->fetch_assoc()) {
+//                                            $row['id'] == $cabangreward ? $selected = "selected" : $selected = ""; 
+//                                            echo "<option " . $selected . " value='". $row['id'] ."'>" . $row['nama'] . "</option>";
+//                                        }
+//                                    }
+                                    ?>
+                                </select>
+                            </div>-->
+                        <?php endif; ?>
                         <div class="form-group">
                             <label>PILIH QUARTAL : </label>
                             <select id="quartal-laporan" name="-laporan" onchange="removeError(this.id)" style="padding: 5px;">
-                                <option value="">None</option>
+                                <option value="">Semua Quartal</option>
                                 <option value="Q1" <?php echo $is_quartal == "Q1" ? 'selected=\"true\"': ""; ?> >Q1</option>
                                 <option value="Q2" <?php echo $is_quartal == "Q2" ? 'selected=\"true\"': ""; ?>>Q2</option>
                                 <option value="Q3" <?php echo $is_quartal == "Q3" ? 'selected=\"true\"': ""; ?>>Q3</option>
                                 <option value="Q4" <?php echo $is_quartal == "Q4" ? 'selected=\"true\"': ""; ?>>Q4</option>
                             </select>
-                            <?php
-                                if ($quartalReward == 0) {
-                                    echo "<i class=\"validation-text\" id=\"val-quartalReward\">" . $quartalRewardErr . "</i>";
-                                }
-                            ?>
                         </div>
                     </form>
                     <button type="button" class="btn btn-info siku" onclick="show_report()">Tampilkan</button>

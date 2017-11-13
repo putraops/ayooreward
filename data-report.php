@@ -1,6 +1,8 @@
 <?php
 require './connection.php';
 
+
+
 $status = isset($_GET['status']) ? $con->real_escape_string($_REQUEST['status']) : '';
 $vendor = isset($_GET['vendor']) ? $con->real_escape_string($_REQUEST['vendor']) : '';
 $cabang = isset($_GET['cabang']) ? $con->real_escape_string($_REQUEST['cabang']) : '';
@@ -21,15 +23,21 @@ $sql =  "Select dbv.kode as kodevendor,
                 dbu1.name as userselesai, 
                 dbjr.nama as jenisreward,
                 c.nama as namacabang,
-                dbu.id_cabang as idcabang 
-        from db_rewards dbr
-        INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
-        LEFT JOIN db_user dbu1 ON dbu1.kode = dbr.user_selesai
-        INNER JOIN db_status dbs ON dbr.status = dbs.kode 
-        INNER JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
-        INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward 
-        LEFT JOIN db_cabang c ON c.id = dbu.id_cabang 
-        where dbr.isDelete = 0";
+                dbu.id_cabang as idcabang, 
+                dbcp.id as id_tablecontactperson, 
+                dbcp.nama as nama_tablecontactperson, 
+                dbcp.email as email_tablecontactperson, 
+                dbcp.telp as telp_tablecontactperson 
+        From db_rewards dbr
+             INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
+             LEFT JOIN db_user dbu1 ON dbu1.kode = dbr.user_selesai
+             INNER JOIN db_status dbs ON dbr.status = dbs.kode 
+             INNER JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
+             INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward 
+             LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson";
+$sql .=  " LEFT JOIN db_cabang c ON c.id = dbr.id_cabang ";
+$sql .=  " WHERE dbr.isDelete = 0 AND dbs.isDelete = 0 ";
+
 if ($status != 0) {
     $sql .= " AND dbr.status = '$status'";
 }
@@ -41,6 +49,13 @@ if ($cabang != 0) {
 }
 if ($quartal != "") {
     $sql .= " AND dbr.quartal = '$quartal'";
+}
+if ($jabatanUserLogin == "admin") {
+    ## Do Nothing
+} else {
+    if ($cabangUserLogin != "0") {
+        $sql .= " AND dbr.id_cabang = '$cabangUserLogin' ";
+    }
 }
 
 //echo $sql;
