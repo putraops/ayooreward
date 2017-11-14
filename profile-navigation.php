@@ -166,6 +166,9 @@ function tanggal_indo($tanggal) {
                     <a href="vendor" ><i class="fa fa-building-o"></i>&nbsp;&nbsp;Vendor</a>
                 </li>  
             <?php endif; ?>
+                <li class="">
+                    <a href="brand" ><i class="fa fa-tags"></i>&nbsp;&nbsp;Brand</a>
+                </li> 
 
             <?php if ($read_user != "0_0") : ?>
                 <li class="">

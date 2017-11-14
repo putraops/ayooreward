@@ -115,7 +115,8 @@ session_start();
                         $isError = false;
                         $succeed = false;
                         $last_id;
-                        $tanggalBuatRewardErr = $tanggalTagihanRewardErr = $documentReferralErr = $jenisRewardErr = $keteranganRewardErr = $vendorRewardErr = "";
+                        $tanggalBuatRewardErr = $tanggalTagihanRewardErr = $documentReferralErr = "";
+                        $jenisRewardErr = $keteranganRewardErr = $vendorRewardErr = $brandRewardErr = "";
                         $quartalRewardErr = "";
                         $namaCPErr = $emailCPErr = $telpCPErr = "";
                         $contactPersonRewardErr = "";
@@ -144,6 +145,7 @@ session_start();
                         
                         
                         $vendorReward = isset($_POST['vendorReward']) ? $_POST['vendorReward'] : '';
+                        $brandReward = isset($_POST['brandReward']) ? $_POST['brandReward'] : '';
                         $tanggalTagihanReward = isset($_POST['tanggalTagihanReward']) ? $_POST['tanggalTagihanReward'] : '';
                         //$memoReward = isset($_POST['memoReward']) ? str_replace(PHP_EOL, '', nl2br($_POST['memoReward'])): '';                        
                         $memoReward = isset($_POST['memoReward']) ? preg_replace("/\r|\n/", "", nl2br($_POST['memoReward'])) : "";
@@ -184,6 +186,10 @@ session_start();
                             }
                             if ($vendorReward == 0) {
                                 $vendorRewardErr = "Vendor tidak boleh kosong";
+                                $isError = true;
+                            }
+                            if ($brandReward== 0) {
+                                $brandRewardErr = "Brand tidak boleh kosong";
                                 $isError = true;
                             }
                             if ($contactPersonReward == 0) {
@@ -309,7 +315,7 @@ session_start();
                                     <button type="button" onclick="addReward()" class="btn btn-primary btn-xs pull-right siku" style="font-family: twcent;"><i class="fa fa-plus-circle"></i> Tambah Jenis Reward</button>
                                     <label>Jenis Reward <span class="required">*</span></label>
                                     <select id="jenisReward" name="jenisReward" onchange="removeError(this.id)">
-                                        <option value="0">Pilih Jenis Reward</option>
+                                        <option></option>
                                         <?php
                                     
                                         require './connection.php';
@@ -357,7 +363,7 @@ session_start();
                                     <button type="button" onclick="addVendor()" class="btn btn-primary btn-xs pull-right siku" style="font-family: twcent;"><i class="fa fa-plus-circle"></i> Tambah Vendor</button>
                                     <label>Vendor <span class="required">*</span></label>
                                     <select id="vendorReward" name="vendorReward" onchange="removeError(this.id)">
-                                        <option value="0">Pilih Vendor</option>
+                                        <option></option>
                                         <?php
                                     
                                         require './connection.php';
@@ -383,6 +389,36 @@ session_start();
                                         <?php
                                         if ($vendorRewardErr) {
                                             echo "<i class=\"validation-text\" id=\"val-vendorReward\">" . $vendorRewardErr . "</i>";
+                                        }
+                                    ?>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <button type="button" onclick="addBrand()" class="btn btn-primary btn-xs pull-right siku" style="font-family: twcent;"><i class="fa fa-plus-circle"></i> Tambah Brand</button>
+                                    <label>Brand <span class="required">*</span></label>
+                                    <select id="brandReward" name="brandReward" onchange="removeError(this.id)">
+                                        <option></option>
+                                        <?php
+
+                                        $query = "SELECT id, nama 
+                                                FROM db_brand
+                                                Where isDelete = 0 
+                                                order by nama ASC;";     
+
+                                        $resultquery = $con->query($query);
+                                        
+                                        if ($resultquery->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $resultquery->fetch_assoc()) {
+                                                echo "<option value='". $row['id'] ."'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        mysqli_close($con);
+                                        ?>
+                                    </select>
+                                        <?php
+                                        if ($brandRewardErr) {
+                                            echo "<i class=\"validation-text\" id=\"val-brandReward\">" . $brandRewardErr . "</i>";
                                         }
                                     ?>
                                 </div>
@@ -556,6 +592,18 @@ session_start();
     
     <script type="text/javascript">
         $('select').select2();
+        $("#brandReward").select2({
+            placeholder: "Silahkan Pilih Brand",
+            allowClear: true
+        });
+        $("#vendorReward").select2({
+            placeholder: "Silahkan Pilih Vendor",
+            allowClear: true
+        });
+        $("#jenisReward").select2({
+            placeholder: "Silahkan Pilih Jenis Reward",
+            allowClear: true
+        });
     </script>  
     
     

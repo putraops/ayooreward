@@ -670,8 +670,8 @@
                     </div>
                     <div class="modal-body" style="font-size: 12pt; letter-spacing: 1px; color: #666;">
                         <div class="form-group col-md-12">
-                            <label>Status</label>
-                            <select class="form-control" class="cbo-status-invoice" id="status-invoice" onclick="removeErrorText(this.id)">
+                            <label>Status: </label>
+                            <select class="form-control" class="cbo-status-invoice" id="status-invoice" onchange="toogleketerangan();" onclick="removeErrorText(this.id)">
                                 <option value="0">Pilih Status</option>
                                 <?php
                                     $sql = "Select kode, nama from db_status WHERE no_urut != 0 AND isDelete = 0 ORDER BY no_urut ASC";                            
@@ -692,6 +692,10 @@
                                 ?>
                             </select>
                             <i class="validation-text" id="val-status-invoice" style="letter-spacing: 0px;"></i>
+                        </div>
+                        <div class="col-md-12 form-group" id="form-status-keterangan" style="display: none;">
+                            <label>Keterangan: </label>
+                            <textarea class="form-control" id="status-keterangan" style="resize: none;"></textarea>
                         </div>
                         <div class="text-right" style="padding: 15px;">
                             <button type="button" class="btn btn-default siku" data-dismiss="modal"> Batal </button>
@@ -772,17 +776,17 @@
                     if (d.status != 2 && d.status != 3) {
                         temp += '<input type="button" id="btn-memo-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'UbahSimpan\')" class="btn btn-primary btn-xs siku" value="Ubah" style="margin-bottom: 3px;" /> <input type="button" id="btn-memo-batal-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'Batal\')" class="btn btn-danger btn-xs siku" value="Batal" style="margin-bottom: 3px; visibility: hidden;" />';
                     }
-                            temp += '<input type="hidden" id="temp-memo-' + d.id + '" value="' + d.keterangan + '" />' +
-                            '<br/><span id="memo-' + d.id + '">' + d.keterangan + '</span>' +
-                            '</div>';
-                            '</div>' +
-                    '';
+                    temp += '<input type="hidden" id="temp-memo-' + d.id + '" value="' + d.keterangan + '" />';
+                    temp += '<br/><span id="memo-' + d.id + '">' + d.keterangan + '</span>';
+                    temp += '</div>';
+                    temp += '</div>';;
             
                     return temp;
                 }
                 // Add event listener for opening and closing details
                 $('#example').on('click', 'td', function (e) {
                     //console.log(e.target.className);
+                    alert();
                     if (e.target.className === " td-control" || e.target.className === "td-control sorting_1" || e.target.className === " details-control") {
                         //alert();
                         var tr = $(this).closest('tr');
@@ -941,12 +945,28 @@
                 }); 
             }            
             
+            
+            function toogleketerangan() {
+                var status = $("#status-invoice").val();
+                if (status == "2" || status == "3") {
+                    $("#form-status-keterangan").css("display", "block");
+                } else {
+                    $("#form-status-keterangan").css("display", "none");
+                }
+            }
             function ubahstatusbeli() {
 //                console.log(indextable);
 //                console.log(tablerow);
 //                console.log($(tablerow));
                 var usernamelogin = localStorage.getItem('session_login_id_ayooklik');
                 var status = $("#status-invoice").val();
+                var statusketerangan = "";
+                if (status == "2" || status == "3") {
+                    statusketerangan = $("#status-keterangan").val();
+                }
+//console.log(usernamelogin);
+//console.log(status);
+//console.log(idstatuschange);
                 var statusname = $("#status-invoice option:selected").text();
 
                 if (status === "0") {
@@ -958,6 +978,7 @@
                         data: {
                            kode: idstatuschange,
                            status: status,
+                           keterangan: statusketerangan,
                            usernamelogin: usernamelogin
                         },
                         success: function(data, textStatus, jqXHR) {
