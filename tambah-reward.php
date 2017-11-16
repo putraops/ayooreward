@@ -188,7 +188,7 @@ session_start();
                                 $vendorRewardErr = "Vendor tidak boleh kosong";
                                 $isError = true;
                             }
-                            if ($brandReward== 0) {
+                            if ($brandReward == 0) {
                                 $brandRewardErr = "Brand tidak boleh kosong";
                                 $isError = true;
                             }
@@ -206,15 +206,15 @@ session_start();
                                     $memoReward = "-";
                                 }
                                 
-                                $sql = "INSERT INTO db_rewards (id_user, kode_vendor, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
-                                 . "VALUES ('$kodeLogin', '$vendorReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
+                                $sql = "INSERT INTO db_rewards (id_user, kode_vendor, idbrand, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
+                                 . "VALUES ('$kodeLogin', '$vendorReward', '$brandReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
                                 
                                 if ($con->query($sql) === TRUE) {
                                     $last_id = $con->insert_id;
                                 } 
                                 
-                                $sql = "INSERT INTO db_rewards_history (id_user, id_reward, kode_vendor, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
-                                 . "VALUES ('$kodeLogin', '$last_id', '$vendorReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
+                                $sql = "INSERT INTO db_rewards_history (id_user, id_reward, kode_vendor, idbrand, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
+                                 . "VALUES ('$kodeLogin', '$last_id', '$vendorReward', '$brandReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
                                 
                                 
                                 $con->query($sql);
@@ -399,6 +399,8 @@ session_start();
                                         <option></option>
                                         <?php
 
+                                        require './connection.php';
+                                        
                                         $query = "SELECT id, nama 
                                                 FROM db_brand
                                                 Where isDelete = 0 
@@ -410,7 +412,8 @@ session_start();
                                             // output data of each row
                                             $selected = "";
                                             while ($row = $resultquery->fetch_assoc()) {
-                                                echo "<option value='". $row['id'] ."'>" . $row['nama'] . "</option>";
+                                                $row['id'] == $brandReward ? $selected = "selected" : $selected = ""; 
+                                                echo "<option " . $selected . " value='". $row['id'] ."'>" . $row['nama'] . "</option>";
                                             }
                                         }
                                         mysqli_close($con);
@@ -532,6 +535,32 @@ session_start();
                         </div>
                         <div class="form-group text-right">
                             <button type="button" class="btn btn-primary siku" onclick="saveReward()">Tambah</button>
+                            <button type="button" class="btn btn-default siku" data-dismiss="modal">Batal</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>    
+        </div>
+        <div class="modal fade" id="modal-addbrand" role="dialog">
+            <div class="modal-dialog siku">
+                <!-- Modal content-->
+                <div class="modal-content siku">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Tambah Brand</h4>
+                    </div>
+                    <div class="modal-body">
+                        <span class='required'>*</span> Harus diisi    
+                        <div class="form-group" style='margin-top: 15px;'>
+                            <div class="form-group">
+                                <label>Nama <span class="required">*</span></label>
+                                <input class="form-control siku" name="brandName" id="brandName" onkeyup="removeError(this.id)" placeholder="Masukkan Brand" value="">
+                                <i class="validation-text" id="val-brandName"></i>
+                            </div>
+                        </div>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-primary siku" onclick="saveBrand()">Tambah</button>
                             <button type="button" class="btn btn-default siku" data-dismiss="modal">Batal</button>
                         </div>
                     </div>
@@ -748,6 +777,44 @@ session_start();
                             $("#contactPersonReward").append("<option value='"+obj+"'>"+ nama + " - " + email + " ( " + telp + " ) " +  "</option>");
                             swal("Berhasil tambah kontak person", "", "success");
                             $("#modal-addcontactperson").modal('hide');
+                        }
+                    }
+                }); 
+            }
+        }
+        
+        
+        function addBrand() {
+            $("#brandName").val("");
+            
+            $("#modal-addbrand").modal('show');
+        }
+        function saveBrand() {
+            var nama = $("#brandName").val();
+                    
+            var isError = false;
+            
+            if (!nama) {
+                $("#val-brandName").html("Nama Brand tidak boleh kosong.");
+                isError = true;
+            }
+            
+            if (!isError) {
+                var url = "ajax/create-brand.php";
+                $.ajax({
+                    url: url,
+                    data: {
+                       nama: nama
+                    },
+                    success: function(data, textStatus, jqXHR) {
+                        var obj = $.parseJSON(data);
+                            
+                        if (obj == "0") {
+                            swal("Gagal tambah brand", "", "warning");
+                        } else {
+                            $("#brandReward").append("<option value='"+obj+"'>"+ nama +"</option>");
+                            swal("Berhasil tambah brand", "", "success");
+                            $("#modal-addbrand").modal('hide');
                         }
                     }
                 }); 

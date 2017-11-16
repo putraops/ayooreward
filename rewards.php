@@ -183,6 +183,8 @@
         $backcolor = "";
         $sql =  "Select dbv.kode as kodevendor, 
                         dbv.nama as namavendor, 
+                        dbb.id as idbrand, 
+                        dbb.nama as namabrand, 
                         dbr.status as status, 
                         dbs.nama as statusnama, 
                         dbs.warna as kodewarna, 
@@ -190,6 +192,7 @@
                         dbr.id as id,
                         dbr.no_po as nopo,
                         dbr.keterangan_reward as keterangan_reward, 
+                        dbr.keteranganclose as keteranganclose, 
                         dbr.tanggal_buat as tanggalbuat, 
                         dbr.tanggal_selesai as tanggalselesai, 
                         dbr.tanggal_tagih as tanggaltagih, 
@@ -207,10 +210,11 @@
                         dbcp.email as email_tablecontactperson, 
                         dbcp.telp as telp_tablecontactperson ";
         $sql .= "From db_rewards dbr
+                 LEFT JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
+                 LEFT JOIN db_brand dbb ON dbb.id = dbr.idbrand 
                  INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
                  LEFT JOIN db_user dbu1 ON dbu1.kode = dbr.user_selesai
                  INNER JOIN db_status dbs ON dbr.status = dbs.kode 
-                 INNER JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
                  INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward 
                  LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson ";
         $sql .=  "LEFT JOIN db_cabang c ON c.id = dbr.id_cabang ";
@@ -250,7 +254,7 @@
         
         //$sql .=  "LIMIT 3";
         
-        //Echo $sql; exit;
+        //echo $sql; exit;
         
         $result = $con->query($sql);
         
@@ -291,10 +295,17 @@
                 $tempfile .= '"reward": "'. $row['jenisreward'] . ' <br/>Detail: ' . ($row['keterangan_reward']) .'",';
                 $tempfile .= '"detailreward": "'. $row['keterangan_reward'].'",';
                 $tempfile .= '"namavendor": "<span class=\'hyperlink\' style=\'color: blue;\' onclick=\"showdetail('. $row['id'] .', '. $row['kodevendor'] .', \'itemvendor\')\">'.$row['namavendor'].'</span>",';
+                $tempfile .= '"namabrand": "'.$row['namabrand'].'",';
                 $tempfile .= '"status": "'.$row['status'].'",';
                 $tempfile .= '"kodewarna": "'.$row['kodewarna'].'",';
                 $tempfile .= '"userselesai": "'.$row['userselesai'].'",';
                 $tempfile .= '"keterangan": "'.$row['memo'].'",';
+                
+//                if ($row['keteranganclose'] == "") {
+//                    $tempfile .= '"keteranganclose": "",';
+//                } else {
+//                    $tempfile .= '"keteranganclose": "'.$row['keteranganclose'].'",';
+//                }
                 
                 if ($row['namacabang'] == "") {
                     $tempfile .= '"cabang": "Semua Cabang",';
@@ -498,6 +509,7 @@
                                         <th>REWARD</th>
     <!--                                    <th>KETERANGAN</th>-->
                                         <th>VENDOR</th>
+                                        <th>BRAND</th>
                                         <th>CONTACT PERSON</th>
                                         <th style="width: 120px;">STATUS</th>
                                         <th>AKSI</th>
@@ -556,34 +568,46 @@
                                 <label>Quartal: </label>
                                 <span class="text-uppercase" id="quartal"></span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Nama Reward:</label>
-                                    <div id="document-referral">-</div>
+                            <div class="col-md-12" style="margin-top: 15px;">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Nama Reward:</label>
+                                            <div id="document-referral">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Vendor:</label>
+                                            <div id="vendor">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Brand:</label>
+                                            <div id="brand">-</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Vendor:</label>
-                                    <div id="vendor">-</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Contact Person:</label>
-                                    <div id="contactperson">-</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Reward:</label>
-                                    <div id="reward">-</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Keterangan:</label>
-                                    <div id="keterangan">-</div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Reward:</label>
+                                            <div id="reward">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Contact Person:</label>
+                                            <div id="contactperson">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Keterangan:</label>
+                                            <div id="keterangan">-</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -640,8 +664,9 @@
                             <thead> 
                                 <tr> 
                                     <th>No</th>
-                                    <th>Cabang</th>
                                     <th>Tanggal Input</th>
+                                    <th>Cabang</th>
+                                    <th>Brand</th>
                                     <th>Quartal</th>
                                     <th>Nama Reward</th>
                                     <th>Reward</th>
@@ -748,6 +773,7 @@
                             { "className": 'td-control', "data": "documentreferral" },
                             { "className": 'td-control', "data": "reward" },
                             { "className": 'td-control', "data": "namavendor" },
+                            { "className": 'td-control', "data": "namabrand" },
                             { "className": 'td-control', "data": "contactperson" },
                             { "className": 'td-control text-center', "data": "statusname" },
                             { "data": "btndelete" 
@@ -786,7 +812,7 @@
                 // Add event listener for opening and closing details
                 $('#example').on('click', 'td', function (e) {
                     //console.log(e.target.className);
-                    alert();
+                    //alert();
                     if (e.target.className === " td-control" || e.target.className === "td-control sorting_1" || e.target.className === " details-control") {
                         //alert();
                         var tr = $(this).closest('tr');
@@ -884,6 +910,7 @@
                             $("#modal-information-by-reward #reward").html(data.jenisreward + "<br /> <i>" + data.keterangan_reward + "</i>");
                             $("#modal-information-by-reward #contactperson").html("Nama: <strong>" + data.nama_cp + "</strong><br />Email: <strong>" + data.email_cp + "</strong><br /> Telp: <strong>" + data.telp_cp + "</strong>" );
                             $("#modal-information-by-reward #vendor").html(data.namavendor);
+                            $("#modal-information-by-reward #brand").html(data.namabrand);
                             $("#modal-information-by-reward #keterangan").html(data.memo === "" ? "-" : data.memo);
                             
                             console.log(obj.HistoryStatus);
@@ -1072,8 +1099,9 @@
                                     var temp = "";
                                     temp += "<tr>";
                                     temp += "<td>" + (i+1) + "</td>";
-                                    temp += "<td>" + obj.Data[i]["cabang"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["tanggalbuat"] + "</td>";
+                                    temp += "<td>" + obj.Data[i]["cabang"] + "</td>";
+                                    temp += "<td>" + obj.Data[i]["namabrand"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["quartal"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["nopo"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["jenisreward"] + "<br/>Detail: " + obj.Data[i]["keterangan_reward"] + "</td>";
