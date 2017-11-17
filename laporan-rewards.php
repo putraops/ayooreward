@@ -106,6 +106,7 @@ session_start();
                         $is_vendor = isset($_GET['vendor']) ? $con->real_escape_string($_REQUEST['vendor']) : '';
                         $is_cabang = isset($_GET['cabang']) ? $con->real_escape_string($_REQUEST['cabang']) : '';
                         $is_quartal = isset($_GET['quartal']) ? $con->real_escape_string($_REQUEST['quartal']) : '';
+                        //$brandreward = isset($_GET['brandreward']) ? $con->real_escape_string($_REQUEST['brandreward']) : '';
                     ?>
 <!--                    <form class="form-inline">
                         <div class="form-group">
@@ -138,6 +139,26 @@ session_start();
                                             echo "<option " . $selected . " value='". $row['kode'] ."'>" . $row['nama'] . "</option>";
                                         }
                                     }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>PILIH BRAND: </label>
+                            <select id="brandReward" name="brandReward" onchange="removeError(this.id)" style="padding: 8px;">
+                                <option value="0">Semua Brand</option>
+                                <?php
+                                //require './connection.php';
+                                $sql = "SELECT id, nama  FROM db_brand Where isDelete = 0 order by nama ASC;"; 
+
+                                $result = $con->query($sql);
+                                if ($result->num_rows > 0) {
+                                    // output data of each row
+                                    $selected = "";
+                                    while ($row = $result->fetch_assoc()) {
+                                        $row['id'] == $brandreward ? $selected = "selected" : $selected = ""; 
+                                        echo "<option " . $selected . " value='". $row['id'] ."'>" . $row['nama'] . "</option>";
+                                    }
+                                }
                                 ?>
                             </select>
                         </div>
