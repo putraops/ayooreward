@@ -1130,6 +1130,8 @@
                         url: 'ajax/select-reward-by-vendor.php',
                         data: {
                            id: param,
+                           jabatan: '<?php echo $jabatanUserLogin;?>',
+                           cabang: '<?php echo $cabangUserLogin;?>'
                         },
                         success: function(data, textStatus, jqXHR) {
                             var obj = $.parseJSON(data);
@@ -1140,6 +1142,8 @@
                             if (data === 0) {
                                 $("#modal-information-by-vendor .modal-body").html("tidak ada data pembelian");
                             } else {
+                                
+                                var temp = "";
                                 for (var i = 0; i < obj.Data.length; i++){
                                     $("#modal-information-by-vendor .modal-title").html("Daftar Pembelian dari vendor " + obj.Data[i]["namavendor"]);
                                     
@@ -1147,7 +1151,6 @@
                                     $("#v-pic-email").text(obj.Data[i]["email_cp"]);
                                     $("#v-pic-telp").text(obj.Data[i]["telp_cp"]);
                                     
-                                    var temp = "";
                                     temp += "<tr>";
                                     temp += "<td>" + (i+1) + "</td>";
                                     temp += "<td>" + obj.Data[i]["tanggalbuat"] + "</td>";
@@ -1156,20 +1159,21 @@
                                     temp += "<td>" + obj.Data[i]["quartal"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["nopo"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["jenisreward"] + "<br/>Detail: " + obj.Data[i]["keterangan_reward"] + "</td>";
-                                    temp += "<td>Nama: " + obj.Data[i]["nama_cp"] + "<br/>Email" + obj.Data[i]["email_cp"] + "<br/>Telp" + obj.Data[i]["telp_cp"] + "</td>";
+                                    temp += "<td>Nama: " + obj.Data[i]["nama_cp"] + "<br/>Email: " + obj.Data[i]["email_cp"] + "<br/>Telp: " + obj.Data[i]["telp_cp"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["statusnama"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["memo"] + "</td>";
                                     temp += "</tr>";
                                     
-                                    if (idcabanguserlogin === "0") {
-                                        print += temp;
-                                    } else if (idcabanguserlogin === obj.Data[i]["idcabang"]) {
-                                        print += temp;
-                                    }
+//                                    if (idcabanguserlogin === "0") {
+//                                        print += temp;
+//                                    } else if (idcabanguserlogin === obj.Data[i]["idcabang"]) {
+//                                        
+//                                    }
+//print += temp;
             
                                     
                                 }
-                                $("#table-body-vendor").html(print);
+                                $("#table-body-vendor").html(temp);
                             } 
                             $('#modal-information-by-vendor').modal('show');
                         },
