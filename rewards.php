@@ -177,6 +177,8 @@
 
         $tipereward = isset($_GET['tipereward']) ? $con->real_escape_string($_REQUEST['tipereward']) : '';
         $cabangreward = isset($_GET['cabangreward']) ? $con->real_escape_string($_REQUEST['cabangreward']) : '';
+        $vendorreward = isset($_GET['vendorreward']) ? $con->real_escape_string($_REQUEST['vendorreward']) : '';
+        $brandreward = isset($_GET['brandreward']) ? $con->real_escape_string($_REQUEST['brandreward']) : '';
         $statusfilter = isset($_GET['status']) ? $con->real_escape_string($_REQUEST['status']) : '';
         $quartalReward = isset($_GET['quartal']) ? $con->real_escape_string($_REQUEST['quartal']) : '';
         
@@ -200,6 +202,8 @@
                         dbr.email_cp as email_cp, 
                         dbr.telp_cp as telp_cp, 
                         dbr.memo as memo,
+                        dbr.kode_vendor as kode_vendor,
+                        dbr.idbrand as idbrand,
                         dbu.name as namauser, 
                         dbu1.name as userselesai, 
                         dbjr.nama as jenisreward,
@@ -236,6 +240,12 @@
         }
         if ($cabangreward && $cabangreward != "0") {
             $sql .= "and dbr.id_cabang = '$cabangreward' ";
+        }
+        if ($vendorreward && $vendorreward != "0") {
+            $sql .= "and dbr.kode_vendor = '$vendorreward' ";
+        }
+        if ($brandreward && $brandreward != "0") {
+            $sql .= "and dbr.idbrand = '$brandreward' ";
         }
         
         //        echo $cabangUserLogin;exit;
@@ -476,7 +486,49 @@
                                         </select>
                                     </div>
                                 <?php endif; ?>
-                                
+                                <div class="form-group">
+                                    <label>Vendor: </label>
+                                    <select id="vendorReward" name="vendorReward" onchange="removeError(this.id)" style="padding: 8px;">
+                                        <option value="0">Semua Vendor</option>
+                                        <?php
+                                        //require './connection.php';
+                                        $sql = "SELECT kode, nama, email, telp, alamat, keterangan, status_hapus, created_at, updated_at 
+                                                FROM db_vendor 
+                                                Where status_hapus = 0 
+                                                order by nama ASC;"; 
+                                         
+                                        $result = $con->query($sql);
+                                        if ($result->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $result->fetch_assoc()) {
+                                                $row['kode'] == $vendorreward ? $selected = "selected" : $selected = ""; 
+                                                echo "<option " . $selected . " value='". $row['kode'] ."'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Brand: </label>
+                                    <select id="brandReward" name="brandReward" onchange="removeError(this.id)" style="padding: 8px;">
+                                        <option value="0">Semua Brand</option>
+                                        <?php
+                                        //require './connection.php';
+                                        $sql = "SELECT id, nama  FROM db_brand Where isDelete = 0 order by nama ASC;"; 
+                                         
+                                        $result = $con->query($sql);
+                                        if ($result->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $result->fetch_assoc()) {
+                                                $row['id'] == $brandreward ? $selected = "selected" : $selected = ""; 
+                                                echo "<option " . $selected . " value='". $row['id'] ."'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
                                 <div class="form-group">
                                     <label>Quartal: </label>
                                     <select id="quartalReward" name="quartalReward" onchange="removeError(this.id)" style="padding: 8px;">
@@ -487,7 +539,6 @@
                                         <option value="Q4" <?php echo $quartalReward == "Q4" ? 'selected=\"true\"': ""; ?>>Q4</option>
                                     </select>
                                 </div>
-                                
                                 <button type="button" class="btn btn-default siku" onclick="showlist()">Tampilkan</button>
                             </form>
                         </div>
@@ -1197,6 +1248,8 @@
                 var status = $("#status-filter").val();
                 var quartalReward = $("#quartalReward").val();
                 var cabangReward = $("#cabangReward").val();
+                var vendorReward = $("#vendorReward").val();
+                var brandReward = $("#brandReward").val();
                 
                 if (cabangReward == undefined) {
                     cabangReward = "0";
@@ -1211,6 +1264,12 @@
                 }
                 if (quartalReward != "") {
                     url += "&quartal=" + quartalReward;
+                }
+                if (vendorReward != "0") {
+                    url += "&vendorreward=" + vendorReward;
+                }
+                if (brandReward != "0") {
+                    url += "&brandreward=" + brandReward;
                 }
                 if (cabangReward != "0") {
                     url += "&cabangreward=" + cabangReward;

@@ -76,7 +76,6 @@ session_start();
                                 <tr>
                                     <th>No</th>
                                     <th>Brand</th>
-                                    <th>Vendor</th>
                                     <?php ##if ($update_brand != "0_0" || $delete_brand != "0_0"): ?>
                                     <th>Aksi</th>
                                     <?php ##endif;?>
@@ -87,9 +86,8 @@ session_start();
 
                                 require './connection.php';
 
-                                $sql = "Select b.id as id, b.nama as namabrand, v.nama as namavendor
+                                $sql = "Select b.id as id, b.nama as namabrand
                                         From db_brand b
-                                        INNER JOIN db_vendor v ON b.id_vendor = v.kode 
                                         order by b.created_at ASC;";                            
 
                                 $result = $con->query($sql);
@@ -100,12 +98,11 @@ session_start();
                                         echo "<tr>";
                                         echo "<td>" . $nomor . "</td>";
                                         echo "<td>" . $row['namabrand'] . "</td>";
-                                        echo "<td>" . $row['namavendor'] . "</td>";
                                         
                                         if ($update_vendor != "0_0" || $delete_vendor != "0_0") {
                                             echo "<td class='text-center'>";
                                             if ($update_vendor != "0_0") {
-                                                echo "<a href='edit-vendor?q=" . $row['id'] . "' class=\"btn btn-primary btn-xs siku\">Ubah&nbsp;</a>&nbsp;";
+                                                echo "<a href='edit-brand?q=" . $row['id'] . "' class=\"btn btn-primary btn-xs siku\">Ubah&nbsp;</a>&nbsp;";
                                             }
                                             if ($delete_vendor != "0_0") {
                                                 echo "<button class=\"btn btn-danger btn-xs siku\" onclick=\"deletevendor(". $row['id'] .")\">Hapus</button>";
