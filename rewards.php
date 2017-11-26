@@ -181,6 +181,7 @@
         $brandreward = isset($_GET['brandreward']) ? $con->real_escape_string($_REQUEST['brandreward']) : '';
         $statusfilter = isset($_GET['status']) ? $con->real_escape_string($_REQUEST['status']) : '';
         $quartalReward = isset($_GET['quartal']) ? $con->real_escape_string($_REQUEST['quartal']) : '';
+        $filter = isset($_GET['filter']) ? $con->real_escape_string($_REQUEST['filter']) : '';
         
         $backcolor = "";
         $sql =  "Select dbv.kode as kodevendor, 
@@ -224,38 +225,44 @@
         $sql .=  "LEFT JOIN db_cabang c ON c.id = dbr.id_cabang ";
         $sql .=  "WHERE dbr.isDelete = 0 AND dbs.isDelete = 0 ";
         
-        
-        
-        if ($firstdate && $lastdate) {
-            $sql .= "and dbr.tanggal_buat between '$firstdate' AND '$lastdate' ";
-        }
-        if ($tipereward && $tipereward != "0") {
-            $sql .= "and dbr.id_jenis_reward = '$tipereward' ";
-        }
-        if ($statusfilter && $statusfilter != "0") {
-            $sql .= "and dbs.kode = '$statusfilter' ";
-        }
-        if ($quartalReward && $quartalReward != "") {
-            $sql .= "and dbr.quartal = '$quartalReward' ";
-        }
-        if ($cabangreward && $cabangreward != "0") {
-            $sql .= "and dbr.id_cabang = '$cabangreward' ";
-        }
-        if ($vendorreward && $vendorreward != "0") {
-            $sql .= "and dbr.kode_vendor = '$vendorreward' ";
-        }
-        if ($brandreward && $brandreward != "0") {
-            $sql .= "and dbr.idbrand = '$brandreward' ";
-        }
-        
-        //        echo $cabangUserLogin;exit;
+        ## Akses
         if ($jabatanUserLogin == "admin") {
             ## Do Nothing
         } else {
             if ($cabangUserLogin != "0") {
                 $sql .= "and dbr.id_cabang = '$cabangUserLogin' ";
             }
+        }        
+        
+        ## Filter
+        if ($filter == "true") {
+            if ($firstdate && $lastdate) {
+                $sql .= "and dbr.tanggal_buat between '$firstdate' AND '$lastdate' ";
+            }
+            if ($tipereward && $tipereward != "0") {
+                $sql .= "and dbr.id_jenis_reward = '$tipereward' ";
+            }
+            if ($statusfilter && $statusfilter != "0") {
+                $sql .= "and dbs.kode = '$statusfilter' ";
+            }
+            if ($quartalReward && $quartalReward != "") {
+                $sql .= "and dbr.quartal = '$quartalReward' ";
+            }
+            if ($cabangreward && $cabangreward != "0") {
+                $sql .= "and dbr.id_cabang = '$cabangreward' ";
+            }
+            if ($vendorreward && $vendorreward != "0") {
+                $sql .= "and dbr.kode_vendor = '$vendorreward' ";
+            }
+            if ($brandreward && $brandreward != "0") {
+                $sql .= "and dbr.idbrand = '$brandreward' ";
+            }  
+        } else {
+            $sql .= "and dbs.kode != '2' AND dbs.kode != '3' ";
         }
+        
+        //        echo $cabangUserLogin;exit;
+        
         
         
         //$sql .= "and dbr.id = '51' ";
@@ -310,6 +317,7 @@
                 $tempfile .= '"kodewarna": "'.$row['kodewarna'].'",';
                 $tempfile .= '"userselesai": "'.$row['userselesai'].'",';
                 $tempfile .= '"keterangan": "'.$row['memo'].'",';
+                $tempfile .= '"keteranganclose": "'.$row['keteranganclose'].'",';
                 
 //                if ($row['keteranganclose'] == "") {
 //                    $tempfile .= '"keteranganclose": "",';
@@ -771,11 +779,11 @@
                         </div>
                         <div class="col-md-12 form-group" id="form-status-keterangan" style="display: none;">
                             <label>Keterangan: </label>
-                            <textarea class="form-control" id="status-keterangan" style="resize: none;"></textarea>
+                            <input type="text" class="form-control" id="status-keterangan" style="resize: none;">
                         </div>
                         <div class="text-right" style="padding: 15px;">
                             <button type="button" class="btn btn-default siku" data-dismiss="modal"> Batal </button>
-                            <button type="button" class="btn btn-primary siku" onclick="ubahstatusbeli()" style="width: 70px;"> Ubah </button>
+                            <button type="button" class="btn btn-primary siku" onclick="ubahstatusreward()" style="width: 70px;"> Ubah </button>
                         </div>
                     </div>
                 </div><!-- /.modal-content -->
@@ -849,12 +857,15 @@
                 function format (d) {
                 // `d` is the original data object for the row
                     console.log(d.createddate);
+                    
                     var temp =  '<div class="col-md-6"><strong>Keterangan: </strong>';
                     if (d.status != 2 && d.status != 3) {
                         temp += '<input type="button" id="btn-memo-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'UbahSimpan\')" class="btn btn-primary btn-xs siku" value="Ubah" style="margin-bottom: 3px;" /> <input type="button" id="btn-memo-batal-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'Batal\')" class="btn btn-danger btn-xs siku" value="Batal" style="margin-bottom: 3px; visibility: hidden;" />';
                     }
                     temp += '<input type="hidden" id="temp-memo-' + d.id + '" value="' + d.keterangan + '" />';
                     temp += '<br/><span id="memo-' + d.id + '">' + d.keterangan + '</span>';
+                    temp += '<br/><br/>';
+                    temp += '<span id="ketclose-' + d.id + '">' + d.keteranganclose + '</span>';
                     temp += '</div>';
                     temp += '</div>';;
             
@@ -1032,7 +1043,7 @@
                     $("#form-status-keterangan").css("display", "none");
                 }
             }
-            function ubahstatusbeli() {
+            function ubahstatusreward() {
 //                console.log(indextable);
 //                console.log(tablerow);
 //                console.log($(tablerow));
@@ -1069,8 +1080,9 @@
                                 }
                                 temp += ">" + statusname;
                                 temp += "</span>";
-                                table.cell(indextable, 9).data(temp).draw();  
+                                table.cell(indextable, 10).data(temp).draw();  
                                 
+                                $("#ketclose-" + idstatuschange).html(statusketerangan);;
                                 console.log("#" + rewardid);
                                 
                                 warna = data;
@@ -1119,8 +1131,17 @@
 
             function showdetail(id, param, act) {
                 if (act === "itemstatus") {
+                    if (param == "2" || param == "3") {
+                        $("#modal-change-status #form-status-keterangan").css("display", "block");
+                    } else {
+                        $("#modal-change-status #form-status-keterangan").css("display", "none");
+                    }
+                    
                     $("#modal-change-status select option").removeAttr("selected");
                     $("#modal-change-status .modal-title").html("UBAH STATUS REWARD");
+                    
+                    
+                    
                     $("#modal-change-status #status-invoice #status-" + param).prop("selected", true);
                     $('#modal-change-status').modal('show');
                 } else if (act === "itemvendor") {
