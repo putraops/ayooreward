@@ -121,6 +121,7 @@ session_start();
                         $is_quartal = isset($_GET['quartal']) ? $con->real_escape_string($_REQUEST['quartal']) : '';
                         $is_brand = isset($_GET['brand']) ? $con->real_escape_string($_REQUEST['brand']) : '';
                         $is_cp = isset($_GET['cp']) ? $con->real_escape_string($_REQUEST['cp']) : '';
+                        $filter = isset($_GET['filter']) ? $con->real_escape_string($_REQUEST['filter']) : '';
                         ?>
                         <!--                    <form class="form-inline">
                                                 <div class="form-group">
@@ -274,9 +275,59 @@ session_start();
                         require './data-report.php';
                         ?>
                     </div>
+                    
+                    <?php if ($filter == "true"):?>
+                    <?php 
+//                    if (status != 0) {
+//                    url += "&status=" + status;
+//                }
+//                if (vendor != 0) {
+//                    url += "&vendor=" + vendor;
+//                }
+//                if (brand != 0) {
+//                    url += "&brand=" + brand;
+//                }
+//                if (cabang != 0) {
+//                    url += "&cabang=" + cabang;
+//                }
+//                if (kontakperson != 0) {
+//                    url += "&cp=" + kontakperson;
+//                }
+//                if (quartal != 0) {
+//                    url += "&quartal=" + quartal;
+//                }
+                    
+                        $url = "filter=true";
+                        if ($status != 0) {
+                            $url .= "&status=$status";
+                        }
+                        if ($vendor != 0) {
+                            $url .= "&vendor=$vendor";
+                        }
+                        if ($brand != 0) {
+                            $url .= "&brand=$brand";
+                        }
+                        if ($cabang != 0) {
+                            $url .= "&cabang=$cabang";
+                        }
+                        if ($cp != 0) {
+                            $url .= "&cp=$cp";
+                        }
+                        if ($quartal != "") {
+                            $url .= "&quartal=$quartal";
+                        }
+                        if ($jabatanUserLogin == "admin") {
+                            ## Do Nothing
+                        } else {
+                            if ($cabangUserLogin != "0") {
+                                $url .= "&cabang=$cabangUserLogin";
+                            }
+                        }
+                    ?>
                     <div class="col-md-12">
-                        <a href="data-report-export-excel.php?filename=Laporan Reward <?php echo date("d-m-Y") ?>"><button class="btn btn-primary siku pull-right" id="btnExport" style="display: block;"> EXPORT KE EXCEL </button></a>
+                        <a href="data-report-export-excel.php?<?php echo $url;?>&filename=Laporan-Reward-<?php echo date("d-m-Y") ?>"><button class="btn btn-primary siku pull-right" id="btnExport" style="display: block;"> EXPORT KE EXCEL </button></a>
                     </div>
+                    <?php endif;?>
                 </div>
                 <hr/>
                 <!-- /.row -->
