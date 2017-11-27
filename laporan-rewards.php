@@ -278,25 +278,6 @@ session_start();
                     
                     <?php if ($filter == "true"):?>
                     <?php 
-//                    if (status != 0) {
-//                    url += "&status=" + status;
-//                }
-//                if (vendor != 0) {
-//                    url += "&vendor=" + vendor;
-//                }
-//                if (brand != 0) {
-//                    url += "&brand=" + brand;
-//                }
-//                if (cabang != 0) {
-//                    url += "&cabang=" + cabang;
-//                }
-//                if (kontakperson != 0) {
-//                    url += "&cp=" + kontakperson;
-//                }
-//                if (quartal != 0) {
-//                    url += "&quartal=" + quartal;
-//                }
-                    
                         $url = "filter=true";
                         if ($status != 0) {
                             $url .= "&status=$status";

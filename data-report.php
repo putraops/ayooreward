@@ -89,6 +89,57 @@ if ($filter != "") {
 }
 ?>
 <h3>Laporan Reward</h3>
+<?php if ($status != 0):?>
+    <?php
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo "<span>Status: " . $row['statusnama'] . " </span><br />";
+    }
+    ?>
+<?php endif;?>
+<?php if ($vendor != 0):?>
+    <?php
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo "<span>Vendor: " . $row['namavendor'] . " </span><br />";
+    }
+    ?>
+<?php endif;?>
+<?php if ($brand != 0):?>
+    <?php
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo "<span>Brand: " . $row['namabrand'] . " </span><br />";
+    }
+    ?>
+<?php endif;?>    
+<?php if ($cabang != 0):?>
+    <?php
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo "<span>Cabang: " . $row['namacabang'] . " </span><br />";
+    }
+    ?>
+<?php endif;?>     
+<?php if ($cp != 0):?>
+    <?php
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo "<span>Kontak Person: " . $row[nama_tablecontactperson] . ' - '. $row[email_tablecontactperson] . ' - '. $row[telp_tablecontactperson] . " </span><br />";
+        
+    }
+    ?>
+<?php endif;?>    
+<?php if ($quartal != ""):?>
+    <?php
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo "<span>Quartal: " . $row[quartal] . " </span><br />";
+        
+    }
+    ?>
+<?php endif;?>  
+<br/>
 <table class="table table-hover table-responsive" id="my-table" border="1"> 
     <thead> 
         <tr style="background-color: #DDD;"> 
