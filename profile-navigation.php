@@ -15,10 +15,10 @@ if (isset($_SESSION["usernamelogin"])) {
     echo "window.location.assign('index');";
     echo "</script>";
 }
-$read_status = $read_user = $read_vendor = $read_barang = $read_purchase = $read_reward = $read_jenis_reward = $read_contactperson = "0_0";
-$update_status = $update_user = $update_privileges = $update_vendor = $update_barang = $update_purchase = $update_reward = $update_jenis_reward = $update_contactperson = "0_0";
-$create_status = $create_user = $create_vendor = $create_barang = $create_purchase = $create_reward = $create_jenis_reward = $create_contactperson = "0_0";
-$delete_vendor = $delete_barang = $delete_purchase = $delete_reward = $delete_jenis_reward = $delete_contactperson = "0_0";
+$read_status = $read_user = $read_vendor = $read_barang = $read_purchase = $read_reward = $read_jenis_reward = $read_contactperson = $read_brand = "0_0";
+$update_status = $update_user = $update_privileges = $update_vendor = $update_barang = $update_purchase = $update_reward = $update_jenis_reward = $update_contactperson = $update_brand = "0_0";
+$create_status = $create_user = $create_vendor = $create_barang = $create_purchase = $create_reward = $create_jenis_reward = $create_contactperson = $create_brand = "0_0";
+$delete_vendor = $delete_barang = $delete_purchase = $delete_reward = $delete_jenis_reward = $delete_contactperson = $delete_brand = "0_0";
 
 $set_user_active = "0_0";
 $create_laporan = "0_0";
@@ -43,10 +43,10 @@ if ($result->num_rows > 0) {
         $jabatanUserLogin = $row['jabatan'];
             
         if ($row['jabatan'] == "admin") {
-            $read_status = $read_user = $read_vendor = $read_barang = $read_purchase = $read_reward = $read_jenis_reward = $read_contactperson = "1_1";
-            $update_status = $update_user = $update_privileges = $update_vendor = $update_barang = $update_purchase = $update_reward = $update_jenis_reward = $update_contactperson = "1_1";
-            $create_status = $create_user = $create_vendor = $create_barang = $create_purchase = $create_reward = $create_jenis_reward = $create_contactperson = "1_1";
-            $delete_vendor = $delete_barang = $delete_purchase = $delete_reward = $delete_jenis_reward = $delete_contactperson = "1_1";
+            $read_status = $read_user = $read_vendor = $read_barang = $read_purchase = $read_reward = $read_jenis_reward = $read_contactperson = $read_brand = "1_1";
+            $update_status = $update_user = $update_privileges = $update_vendor = $update_barang = $update_purchase = $update_reward = $update_jenis_reward = $update_contactperson = $update_brand = "1_1";
+            $create_status = $create_user = $create_vendor = $create_barang = $create_purchase = $create_reward = $create_jenis_reward = $create_contactperson = $create_brand = "1_1";
+            $delete_vendor = $delete_barang = $delete_purchase = $delete_reward = $delete_jenis_reward = $delete_contactperson = $delete_brand = "1_1";
 
             $set_user_active = "1_1";
             $create_laporan = "1_1";
@@ -95,6 +95,11 @@ if ($result->num_rows > 0) {
             $row['priv'] == 31 ? $create_contactperson = $row['priv'] . "_1" : "";
             $row['priv'] == 32 ? $update_contactperson = $row['priv'] . "_1" : "";
             $row['priv'] == 33 ? $delete_contactperson = $row['priv'] . "_1" : "";
+            
+            $row['priv'] == 34 ? $read_brand = $row['priv'] . "_1" : "";
+            $row['priv'] == 35 ? $create_brand = $row['priv'] . "_1" : "";
+            $row['priv'] == 36 ? $update_brand = $row['priv'] . "_1" : "";
+            $row['priv'] == 37 ? $delete_brand = $row['priv'] . "_1" : "";
         }
     }
 }
@@ -166,10 +171,13 @@ function tanggal_indo($tanggal) {
                     <a href="vendor" ><i class="fa fa-building-o"></i>&nbsp;&nbsp;Vendor</a>
                 </li>  
             <?php endif; ?>
+                
+            <?php if ($read_brand != "0_0") : ?>
                 <li class="">
                     <a href="brand" ><i class="fa fa-tags"></i>&nbsp;&nbsp;Brand</a>
                 </li> 
-
+            <?php endif; ?>
+                
             <?php if ($read_user != "0_0") : ?>
                 <li class="">
                     <a href="user" ><i class="fa fa-users"></i>&nbsp;&nbsp;User</a>

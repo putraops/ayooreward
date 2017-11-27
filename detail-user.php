@@ -68,10 +68,10 @@ session_start();
                 $currentkode = $con->real_escape_string($_REQUEST["k"]);
                 $name = $email = $telp = $status = $lastlogin = $temp = "";
                 //== First = id_privilages || Second = isChecked
-                $read_status = $read_user = $read_vendor = $read_barang = $read_purchase = $read_reward = $read_jenis_reward = $read_contactperson = "0_0";
-                $update_status = $update_user = $update_privileges = $update_vendor = $update_barang = $update_purchase = $update_reward = $update_jenis_reward = $update_contactperson = "0_0";
-                $create_status = $create_user = $create_vendor = $create_barang = $create_purchase = $create_reward = $create_jenis_reward = $create_contactperson = "0_0";
-                $delete_vendor = $delete_barang = $delete_purchase = $delete_reward = $delete_jenis_reward = $delete_contactperson = "0_0";
+                $read_status = $read_user = $read_vendor = $read_barang = $read_purchase = $read_reward = $read_jenis_reward = $read_contactperson = $read_brand = "0_0";
+                $update_status = $update_user = $update_privileges = $update_vendor = $update_barang = $update_purchase = $update_reward = $update_jenis_reward = $update_contactperson = $update_brand = "0_0";
+                $create_status = $create_user = $create_vendor = $create_barang = $create_purchase = $create_reward = $create_jenis_reward = $create_contactperson = $create_brand = "0_0";
+                $delete_vendor = $delete_barang = $delete_purchase = $delete_reward = $delete_jenis_reward = $delete_contactperson = $delete_brand = "0_0";
                 $delete_contactperson = $delete_barang = $delete_purchase = $delete_reward = $delete_jenis_reward = "0_0";
 
                 $set_user_active = "0_0";
@@ -150,6 +150,11 @@ session_start();
                             $row['priv'] == 31 ? $create_contactperson = $row['priv'] . "_1" : "";
                             $row['priv'] == 32 ? $update_contactperson = $row['priv'] . "_1" : "";
                             $row['priv'] == 33 ? $delete_contactperson = $row['priv'] . "_1" : "";
+                            
+                            $row['priv'] == 34 ? $read_brand = $row['priv'] . "_1" : "";
+                            $row['priv'] == 35 ? $create_brand = $row['priv'] . "_1" : "";
+                            $row['priv'] == 36 ? $update_brand = $row['priv'] . "_1" : "";
+                            $row['priv'] == 37 ? $delete_brand = $row['priv'] . "_1" : "";
 
                         }
                     }
@@ -296,6 +301,24 @@ session_start();
                             </label><br/>
                             <label class="checkbox-inline">
                                 <input type="checkbox" class="sistem-login" <?php $temp = explode("_", $delete_contactperson); echo $temp[1] == "1" ? "checked" : ""; ?> id="priv_33" name="select_login"> Hapus
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="row col-lg-2 col-md-3 col-sm-4 col-xs-6" >
+                        <div class="form-group">
+                            <label style="font-size: 15pt;">Brand</label> <br/>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" class="sistem-login" <?php $temp = explode("_", $read_brand); echo $temp[1] == "1" ? "checked" : ""; ?> id="priv_34" name="select_login"> Lihat Daftar
+                            </label><br/>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" class="sistem-login" <?php $temp = explode("_", $create_brand); echo $temp[1] == "1" ? "checked" : ""; ?> id="priv_35" name="select_login"> Tambah
+                            </label><br/>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" class="sistem-login" <?php $temp = explode("_", $update_brand); echo $temp[1] == "1" ? "checked" : ""; ?> id="priv_36" name="select_login"> Ubah
+                            </label><br/>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" class="sistem-login" <?php $temp = explode("_", $delete_brand); echo $temp[1] == "1" ? "checked" : ""; ?> id="priv_37" name="select_login"> Hapus
                             </label>
                         </div>
                     </div>

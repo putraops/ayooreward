@@ -42,7 +42,7 @@ session_start();
         <?php require 'profile-navigation.php'; ?>
         <?php 
         echo "<script>";
-        if ($read_vendor == "0_0") {
+        if ($read_brand == "0_0") {
             echo "window.location.href = 'rewards';";
         }
         echo "</script>";
@@ -64,7 +64,7 @@ session_start();
             <!-- /.row -->
 
             <div class="row">
-                <?php if ($create_vendor != "0_0"): ?>
+                <?php if ($create_brand != "0_0"): ?>
                 <div class="col-lg-12">
                     <a href="tambah-brand" type="button" class="btn btn-info siku"><strong>+</strong> Tambah Brand</a><br/><br/>
                 </div>
@@ -76,9 +76,9 @@ session_start();
                                 <tr>
                                     <th>No</th>
                                     <th>Brand</th>
-                                    <?php ##if ($update_brand != "0_0" || $delete_brand != "0_0"): ?>
+                                    <?php if ($update_brand != "0_0" || $delete_brand != "0_0"): ?>
                                     <th>Aksi</th>
-                                    <?php ##endif;?>
+                                    <?php endif;?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -88,6 +88,7 @@ session_start();
 
                                 $sql = "Select b.id as id, b.nama as namabrand
                                         From db_brand b
+                                        Where isdelete = 0
                                         order by b.created_at ASC;";                            
 
                                 $result = $con->query($sql);
@@ -99,12 +100,12 @@ session_start();
                                         echo "<td>" . $nomor . "</td>";
                                         echo "<td>" . $row['namabrand'] . "</td>";
                                         
-                                        if ($update_vendor != "0_0" || $delete_vendor != "0_0") {
+                                        if ($update_brand != "0_0" || $delete_brand != "0_0") {
                                             echo "<td class='text-center'>";
-                                            if ($update_vendor != "0_0") {
-                                                echo "<a href='edit-brand?q=" . $row['id'] . "' class=\"btn btn-primary btn-xs siku\">Ubah&nbsp;</a>&nbsp;";
+                                            if ($update_brand != "0_0") {
+                                                echo "<a href='edit-brand?q=" . $row['id'] . "' class=\"btn btn-primary btn-xs siku\">&nbsp;Ubah&nbsp;</a>&nbsp;";
                                             }
-                                            if ($delete_vendor != "0_0") {
+                                            if ($delete_brand != "0_0") {
                                                 echo "<button class=\"btn btn-danger btn-xs siku\" onclick=\"deletevendor(". $row['id'] .")\">Hapus</button>";
                                             }
                                             echo "</td>";
@@ -143,14 +144,14 @@ session_start();
         }
         
         function deletevendor(kode) {
-            if (confirm("Apakah anda yakin ingin menghapus vendor ini?")) {
-                var url = 'ajax/delete-vendor.php?kode=' + kode;
+            if (confirm("Apakah anda yakin ingin menghapus brand ini?")) {
+                var url = 'ajax/delete-brand.php?kode=' + kode;
                 $.ajax({
                     url: url,
                     success: function(data, textStatus, jqXHR) {
                         if (data == "1") {
                             swal({
-                                title: "Berhasil menghapus vendor",
+                                title: "Berhasil menghapus brand",
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "Black",
@@ -161,7 +162,7 @@ session_start();
                             },
                             function(isConfirm) {
                                 if (isConfirm) {  
-                                    window.location.href = "vendor";
+                                    window.location.href = "brand";
                                 }
                             });   
                         }
