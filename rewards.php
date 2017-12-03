@@ -258,7 +258,7 @@
                 $sql .= "and dbr.idbrand = '$brandreward' ";
             }  
         } else {
-            $sql .= "and dbs.kode != '2' AND dbs.kode != '3' ";
+            ##$sql .= "and dbs.kode != '2' AND dbs.kode != '3' ";
         }
         
         //        echo $cabangUserLogin;exit;
