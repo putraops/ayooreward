@@ -814,8 +814,14 @@
                 console.log(localStorage.getItem('session_login_role_ayooklik'));
                
                 arrayStatus = <?php echo json_encode($arrayStatus);?>;              
-//contactperson
+                
+                var defaultDatatableReward = 50;
+                
+                if (typeof(Storage) !== "undefined") {
+                    defaultDatatableReward = localStorage.getItem("defaultDatatableReward");
+                }
                 table = $('#example').DataTable({
+                    "pageLength": defaultDatatableReward,
                     "ajax": "datatables/objects.txt",
                     "columns": [
                             {
@@ -849,6 +855,10 @@
                     
                 });
                 
+                $("#example_wrapper select").change(function(){
+                    //alert();
+                    localStorage.setItem("defaultDatatableReward", $("#example_wrapper select").val());
+                }); 
                 //table.ajax.reload();
                 
                 //table.fnDraw();
