@@ -331,6 +331,8 @@
                     $tempfile .= '"cabang": "'.$row['namacabang'].'",';
                 }
                     
+                $tempfile .= '"btnlihat": "<a onclick=\'detailreward('.$row['id'].')\' class=\'btn btn-success btn-action btn-xs siku\'>Detail</a>",';
+                
                 ## Aksi 
                 $tempfile .= '"btndelete": "';
                 $tempfile .= '<a onclick=\'detailreward('.$row['id'].')\' class=\'btn btn-success btn-action btn-xs siku\'>Detail</a> <br/>';
@@ -349,6 +351,7 @@
                 $temp = ' hyperlink \"'; 
                 $temp .= 'title=\'Klik untuk menggubah status reward\' onclick=\"showdetail('. $row['id'] .', '. $row['status'] .', \'itemstatus\')\" ';
 
+                $tempfile .= '"onlystatusname": "'.$row['statusnama'].'",';
                 $tempfile .= '"statusname": "<span class=\"badge-hyperlink';
                 if ($row['status'] == 2 || $row['status'] == 3) {
                     if  ($_SESSION["roleLogin"] == "admin") {
@@ -364,6 +367,7 @@
                 $tempfile .= $row['statusnama'];//. $_SESSION["roleLogin"];
                 $tempfile .= '</span>"';
 
+                
                 
                 
                 
@@ -668,6 +672,14 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row" style="margin-top: 20px;">
+                                     <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label id="keteranganclosename">Keterangan Close:</label>
+                                            <div id="keteranganclose" style="">-</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <hr />
@@ -825,9 +837,9 @@
                     "ajax": "datatables/objects.txt",
                     "columns": [
                             {
-                            "className":      'details-control',
+                            //"className":      'details-control',
                             "orderable":      false,
-                            "data":           null,
+                            "data":           'btnlihat',
                             "defaultContent": ''
                             },
                             { "className": 'td-control', "data": "no" },
@@ -866,25 +878,37 @@
                 
                 function format (d) {
                 // `d` is the original data object for the row
-                    console.log(d.createddate);
+                    //console.log(d.createddate);
                     
-                    var temp =  '<div class="col-md-6"><strong>Keterangan: </strong>';
+                    var temp =  '';
+                   
+                    temp += '<div class="col-md-6" id="history-status-'+d.id+'">';
+                    temp += '</div>';
+                    
+                    temp += '<div class="col-md-6"><strong>Keterangan: </strong>';
                     if (d.status != 2 && d.status != 3) {
                         temp += '<input type="button" id="btn-memo-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'UbahSimpan\')" class="btn btn-primary btn-xs siku" value="Ubah" style="margin-bottom: 3px;" /> <input type="button" id="btn-memo-batal-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'Batal\')" class="btn btn-danger btn-xs siku" value="Batal" style="margin-bottom: 3px; visibility: hidden;" />';
                     }
                     temp += '<input type="hidden" id="temp-memo-' + d.id + '" value="' + d.keterangan + '" />';
                     temp += '<br/><span id="memo-' + d.id + '">' + d.keterangan + '</span>';
-                    temp += '<br/><br/>';
-                    temp += '<span id="ketclose-' + d.id + '">' + d.keteranganclose + '</span>';
+                    
+                    temp += '<div id="ketclose-' + d.id + '">';
+                    if (d.keteranganclose != "") {
+                        temp += '<br/>';
+                        temp += '<span style="font-size: 20px; color: blue; text-decoration: underline;" >Keterangan ' + d.onlystatusname + ': ' + d.keteranganclose + '</span>';
+                    }
                     temp += '</div>';
-                    temp += '</div>';;
-            
+                    temp += '</div>';
+                    temp += '</div>';
+                    //return "";
+                    //alert(d.id);
                     return temp;
                 }
                 // Add event listener for opening and closing details
                 $('#example').on('click', 'td', function (e) {
                     //console.log(e.target.className);
                     //alert();
+                    console.log(this);
                     if (e.target.className === " td-control" || e.target.className === "td-control sorting_1" || e.target.className === " details-control") {
                         //alert();
                         var tr = $(this).closest('tr');
@@ -892,12 +916,84 @@
 
                         if (row.child.isShown()) {
                             // This row is already open - close it
+                            console.log(row.child);
                             row.child.hide();
                             tr.removeClass('shown');
                         }
                         else {
+                            console.log(row.data());
                             // Open this row
-                            row.child( format(row.data())).show();
+                            if (tr.hasClass("hasHistory")) {
+                                row.child.show();
+                            } else {
+                                row.child( format(row.data())).show();
+                                tr.addClass('hasHistory');
+                                
+                                var rew_id = row.data().id;
+                                $.ajax({
+                                    type: "POST",
+                                    url: 'ajax/select-reward-status-by-id',
+                                    data: {
+                                        id: rew_id
+                                    },
+                                    // timeout: 10000, // sets timeout to 10 seconds
+                                    // dataType: "json",
+                                    beforeSend: function () {
+                                        // Handle the beforeSend event
+                                        $("#history-status-" + rew_id).html('<i class="fa fa-2x fa-spinner fa-spin"></i>');
+                                    },
+                                    complete: function () {
+                                        // Handle the complete event
+                                    },
+                                    error: function (xhr, ajaxOptions, thrownError) {
+                                        alert(xhr.status);
+                                        alert(thrownError);
+                                    },
+                                    success: function (response) {
+                                        var returnJSON = $.parseJSON(response);
+                                        console.log(returnJSON);
+                                        if (returnJSON.status === "succeeded") {
+                                            var temp = "";
+
+                                            temp += "    <div class=\"col-md-12\">";
+                                            temp += "        <div class=\"form-group\">";
+                                            temp += "            <label>History Status <span style=\"color: red;\">*</span> </label>";
+                                            temp += "        </div>";
+                                            temp += "    </div>";
+                                            temp += "    <div class=\"col-md-12\">";
+                                            temp += "        <table class=\"table table-sm\">";
+                                            temp += "            <thead>";
+                                            temp += "                <tr>";
+                                            temp += "                    <th>#</th>";
+                                            temp += "                    <th>Status</th>";
+                                            temp += "                    <th>Diubah oleh</th>";
+                                            temp += "                    <th>Tanggal</th>";
+                                            temp += "                </tr>";
+                                            temp += "            </thead>";
+                                            temp += "                <tbody>";
+                                            for(var i = 0; i < returnJSON.HistoryStatus.length; i++) {
+                                                temp += "<tr>";
+                                                temp += "<td>"+ (i+1) +"</td>";
+                                                temp += "<td>"+ returnJSON.HistoryStatus[i].namastatus+"</td>";
+                                                temp += "<td>"+ returnJSON.HistoryStatus[i].namapengubah+"</td>";
+                                                temp += "<td>"+ returnJSON.HistoryStatus[i].tanggalbuat+"</td>";
+                                                temp += "</tr>";
+                                            }
+                                            temp += "                </tbody>";
+                                            temp += "            </table>";
+                                            temp += "    </div>";
+
+                                            $("#history-status-" + rew_id).html(temp);
+
+                                        } else {
+                                            alert("Silahkan cek koneksi internet.");
+                                        }
+                                    }
+                                }).done(function () {
+                                    // $( this ).addClass( "done" );
+                                    //$('button.proccess').attr('disabled', false);
+                                });
+                            }
                             tr.addClass('shown');
                         }
                     }
@@ -984,6 +1080,24 @@
                             $("#modal-information-by-reward #vendor").html(data.namavendor);
                             $("#modal-information-by-reward #brand").html(data.namabrand);
                             $("#modal-information-by-reward #keterangan").html(data.memo === "" ? "-" : data.memo);
+                            
+                            //style="font-size: 20px; color: blue; text-decoration: underline;"
+                            $("#modal-information-by-reward #keteranganclose").css("font-size", "12px");
+                            $("#modal-information-by-reward #keteranganclose").css("color", "black");
+                            $("#modal-information-by-reward #keteranganclose").css("text-decoration", "none");
+                            $("#modal-information-by-reward #keteranganclosename").html("Keterangan Close:");
+                            
+                            if (data.keteranganclose === "") {                               
+                                $("#modal-information-by-reward #keteranganclose").html("-");
+                            } else {
+                                $("#modal-information-by-reward #keteranganclose").css("font-size", "20px");
+                                $("#modal-information-by-reward #keteranganclose").css("color", "blue");
+                                $("#modal-information-by-reward #keteranganclose").css("text-decoration", "underline");
+                                $("#modal-information-by-reward #keteranganclosename").html("Keterangan " + data.statusnama + ":");
+                                $("#modal-information-by-reward #keteranganclose").html(data.keteranganclose);
+                            }
+                            //$("#modal-information-by-reward #keteranganclose").html(data.keteranganclose === "" ? "-" : data.keteranganclose);
+                            console.log(data);
                             
                             console.log(obj.HistoryStatus);
                             var temp = "";
@@ -1092,8 +1206,11 @@
                                 temp += "</span>";
                                 table.cell(indextable, 10).data(temp).draw();  
                                 
-                                $("#ketclose-" + idstatuschange).html(statusketerangan);;
-                                console.log("#" + rewardid);
+                                var ketclose = '';
+                                    ketclose += '<br/>';
+                                    ketclose += '<span style="font-size: 20px; color: blue; text-decoration: underline;" >Keterangan ' + statusname + ': ' + statusketerangan + '</span>';
+                    
+                                $("#ketclose-" + idstatuschange).html(ketclose);
                                 
                                 warna = data;
                                 
