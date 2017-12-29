@@ -103,10 +103,20 @@ session_start();
                 <div class="col-md-8">
                         <?php
                         require './connection.php';
+                    
+                        //echo $jabatanUserLogin;
+                        //echo $cabangUserLogin;
+        
+                        $valuecabangreward = 0;
+                        
+                        //echo $cabangUserLogin;
+                        //echo $tempcabangreward;
+        
                         $isError = false;
                         $succeed = false;
                         $last_id;
-                        $tanggalBuatRewardErr = $tanggalTagihanRewardErr = $documentReferralErr = $jenisRewardErr = $keteranganRewardErr = $vendorRewardErr = "";
+                        $tanggalBuatRewardErr = $tanggalTagihanRewardErr = $documentReferralErr = "";
+                        $jenisRewardErr = $keteranganRewardErr = $vendorRewardErr = $brandRewardErr = "";
                         $quartalRewardErr = "";
                         $namaCPErr = $emailCPErr = $telpCPErr = "";
                         $contactPersonRewardErr = "";
@@ -121,6 +131,12 @@ session_start();
                         $keteranganReward = isset($_POST['keteranganReward']) ? preg_replace("/\r|\n/", "", nl2br($_POST['keteranganReward'])) : "";
                         $keteranganReward = htmlspecialchars($keteranganReward , ENT_QUOTES);
                         
+                        if ($jabatanUserLogin == "user") {
+                            $valuecabangreward = $cabangUserLogin;
+                        } else {
+                            $valuecabangreward = isset($_POST['cabangReward']) ? $_POST['cabangReward'] : '0';
+                        }
+                        
                         //$keteranganReward = str_replace('"', '&#34;', $keteranganReward);
                         //$keteranganReward = str_replace('"', '&#34;', $keteranganReward);
                         //$keteranganReward = str_replace("'", '&#39;', $keteranganReward);htmlspecialchars
@@ -129,6 +145,7 @@ session_start();
                         
                         
                         $vendorReward = isset($_POST['vendorReward']) ? $_POST['vendorReward'] : '';
+                        $brandReward = isset($_POST['brandReward']) ? $_POST['brandReward'] : '';
                         $tanggalTagihanReward = isset($_POST['tanggalTagihanReward']) ? $_POST['tanggalTagihanReward'] : '';
                         //$memoReward = isset($_POST['memoReward']) ? str_replace(PHP_EOL, '', nl2br($_POST['memoReward'])): '';                        
                         $memoReward = isset($_POST['memoReward']) ? preg_replace("/\r|\n/", "", nl2br($_POST['memoReward'])) : "";
@@ -171,6 +188,10 @@ session_start();
                                 $vendorRewardErr = "Vendor tidak boleh kosong";
                                 $isError = true;
                             }
+                            if ($brandReward == 0) {
+                                $brandRewardErr = "Brand tidak boleh kosong";
+                                $isError = true;
+                            }
                             if ($contactPersonReward == 0) {
                                 $contactPersonRewardErr = "Kontak Person tidak boleh kosong";
                                 $isError = true;
@@ -185,15 +206,15 @@ session_start();
                                     $memoReward = "-";
                                 }
                                 
-                                $sql = "INSERT INTO db_rewards (id_user, kode_vendor, id_jenis_reward, id_contactperson, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
-                                 . "VALUES ('$kodeLogin', '$vendorReward', '$jenisReward', '$contactPersonReward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
+                                $sql = "INSERT INTO db_rewards (id_user, kode_vendor, idbrand, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
+                                 . "VALUES ('$kodeLogin', '$vendorReward', '$brandReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
                                 
                                 if ($con->query($sql) === TRUE) {
                                     $last_id = $con->insert_id;
                                 } 
                                 
-                                $sql = "INSERT INTO db_rewards_history (id_user, id_reward, kode_vendor, id_jenis_reward, id_contactperson, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
-                                 . "VALUES ('$kodeLogin', '$last_id', '$vendorReward', '$jenisReward', '$contactPersonReward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
+                                $sql = "INSERT INTO db_rewards_history (id_user, id_reward, kode_vendor, idbrand, id_jenis_reward, id_contactperson, id_cabang, keterangan_reward, no_po, quartal, tanggal_buat, tanggal_tagih, nama_cp, email_cp, telp_cp, status, memo, isDelete, created_at, updated_at) "
+                                 . "VALUES ('$kodeLogin', '$last_id', '$vendorReward', '$brandReward', '$jenisReward', '$contactPersonReward', '$valuecabangreward', '$keteranganReward', '$documentReferral', '$quartalReward', '$tanggalBuatReward_new', '$tanggalTagihanReward_new', '$vendorNamaCP', '$vendorEmailCP', '$vendorTelpCP', '1', '$memoReward', '0', now(), now())";
                                 
                                 
                                 $con->query($sql);
@@ -237,6 +258,30 @@ session_start();
                         </div>
                         <div class="panel-body">
                             <form class="row" role="form" method="post" action="tambah-reward" style="">
+                                <?php if ($jabatanUserLogin == "admin"): ?>
+                                <div class="form-group col-md-12">
+                                    <label>Cabang</label>
+                                    <select id="cabangReward" name="cabangReward" onchange="removeError(this.id)">
+                                        <option value="0" <?php echo $valuecabangreward == "0" ? "selected" : ""; ?>>Semua Cabang</option>
+                                        <?php
+                                        require './connection.php';
+
+                                        $sql = "SELECT id, nama, created_at, updated_at FROM db_cabang Where status > 0 order by nama ASC;";
+
+                                        $result = $con->query($sql);
+                                        if ($result->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $result->fetch_assoc()) {
+                                                $row['id'] == $valuecabangreward ? $selected = "selected" : $selected = "";
+                                                echo "<option " . $selected . " value='" . $row['id'] . "'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        mysqli_close($con);
+                                        ?>
+                                    </select>
+                                </div>
+                                <?php endif;?>
                                 <div class="form-group col-md-4">
                                     <label>Nama Reward</label>
                                     <input class="form-control siku" id="inp_nopo" name="documentReferral" value="<?php echo $documentReferral; ?>" onkeyup="removeError(this.id)" placeholder="Nama Reward">
@@ -270,7 +315,7 @@ session_start();
                                     <button type="button" onclick="addReward()" class="btn btn-primary btn-xs pull-right siku" style="font-family: twcent;"><i class="fa fa-plus-circle"></i> Tambah Jenis Reward</button>
                                     <label>Jenis Reward <span class="required">*</span></label>
                                     <select id="jenisReward" name="jenisReward" onchange="removeError(this.id)">
-                                        <option value="0">Pilih Jenis Reward</option>
+                                        <option></option>
                                         <?php
                                     
                                         require './connection.php';
@@ -318,7 +363,7 @@ session_start();
                                     <button type="button" onclick="addVendor()" class="btn btn-primary btn-xs pull-right siku" style="font-family: twcent;"><i class="fa fa-plus-circle"></i> Tambah Vendor</button>
                                     <label>Vendor <span class="required">*</span></label>
                                     <select id="vendorReward" name="vendorReward" onchange="removeError(this.id)">
-                                        <option value="0">Pilih Vendor</option>
+                                        <option></option>
                                         <?php
                                     
                                         require './connection.php';
@@ -344,6 +389,39 @@ session_start();
                                         <?php
                                         if ($vendorRewardErr) {
                                             echo "<i class=\"validation-text\" id=\"val-vendorReward\">" . $vendorRewardErr . "</i>";
+                                        }
+                                    ?>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <button type="button" onclick="addBrand()" class="btn btn-primary btn-xs pull-right siku" style="font-family: twcent;"><i class="fa fa-plus-circle"></i> Tambah Brand</button>
+                                    <label>Brand <span class="required">*</span></label>
+                                    <select id="brandReward" name="brandReward" onchange="removeError(this.id)">
+                                        <option></option>
+                                        <?php
+
+                                        require './connection.php';
+                                        
+                                        $query = "SELECT id, nama 
+                                                FROM db_brand
+                                                Where isDelete = 0 
+                                                order by nama ASC;";     
+
+                                        $resultquery = $con->query($query);
+                                        
+                                        if ($resultquery->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $resultquery->fetch_assoc()) {
+                                                $row['id'] == $brandReward ? $selected = "selected" : $selected = ""; 
+                                                echo "<option " . $selected . " value='". $row['id'] ."'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        mysqli_close($con);
+                                        ?>
+                                    </select>
+                                        <?php
+                                        if ($brandRewardErr) {
+                                            echo "<i class=\"validation-text\" id=\"val-brandReward\">" . $brandRewardErr . "</i>";
                                         }
                                     ?>
                                 </div>
@@ -384,45 +462,7 @@ session_start();
                                             echo "<i class=\"validation-text\" id=\"val-contactPersonReward\">" . $contactPersonRewardErr . "</i>";
                                         }
                                     ?>
-                                </div>
-                                
-<!--                                <div class="col-md-12">
-                                    <label>Kontak Person</label>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Nama</label>
-                                        <input class="form-control" name="vendorNamaCP" id="vendorNamaCP" onkeyup="removeError(this.id)" placeholder="Nama Kontak Person" value="<?php echo $vendorNamaCP; ?>">
-                                        <?php
-                                            if ($namaCPErr) {
-                                                echo "<i class=\"validation-text\" id=\"val-vendorNamaCP\">" . $namaCPErr . "</i>";
-                                            }
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Email</label>
-                                        <input class="form-control" name="vendorEmailCP" id="vendorEmailCP" onkeyup="removeError(this.id)" placeholder="Email Kontak Person" value="<?php echo $vendorEmailCP; ?>">
-                                        <?php
-                                            if ($emailCPErr) {
-                                                echo "<i class=\"validation-text\" id=\"val-vendorEmailCP\">" . $emailCPErr . "</i>";
-                                            }
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>No Hp</label>
-                                        <input class="form-control" name="vendorTelpCP" id="vendorTelpCP" onkeyup="removeError(this.id)" placeholder="No Hp Kontak Person" value="<?php echo $vendorTelpCP; ?>">
-                                        <?php
-                                            if ($telpCPErr) {
-                                                echo "<i class=\"validation-text\" id=\"val-vendorTelpCP\">" . $telpCPErr . "</i>";
-                                            }
-                                        ?>
-                                    </div>
-                                </div>-->
-                                
+                                </div>                                
                                 <div class="form-group col-md-12" style="margin-top: 0px;">
                                     <button type="submit" class="btn btn-primary siku full-width" name="submit" ><i class="fa fa-save"> </i> Simpan</button>
                                 </div>
@@ -502,6 +542,32 @@ session_start();
                 </div>
             </div>    
         </div>
+        <div class="modal fade" id="modal-addbrand" role="dialog">
+            <div class="modal-dialog siku">
+                <!-- Modal content-->
+                <div class="modal-content siku">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Tambah Brand</h4>
+                    </div>
+                    <div class="modal-body">
+                        <span class='required'>*</span> Harus diisi    
+                        <div class="form-group" style='margin-top: 15px;'>
+                            <div class="form-group">
+                                <label>Nama <span class="required">*</span></label>
+                                <input class="form-control siku" name="brandName" id="brandName" onkeyup="removeError(this.id)" placeholder="Masukkan Brand" value="">
+                                <i class="validation-text" id="val-brandName"></i>
+                            </div>
+                        </div>
+                        <div class="form-group text-right">
+                            <button type="button" class="btn btn-primary siku" onclick="saveBrand()">Tambah</button>
+                            <button type="button" class="btn btn-default siku" data-dismiss="modal">Batal</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>    
+        </div>
         <div class="modal fade" id="modal-addcontactperson" role="dialog">
             <div class="modal-dialog siku">
                 <!-- Modal content-->
@@ -555,7 +621,19 @@ session_start();
     
     <script type="text/javascript">
         $('select').select2();
-    </script>
+        $("#brandReward").select2({
+            placeholder: "Silahkan Pilih Brand",
+            allowClear: true
+        });
+        $("#vendorReward").select2({
+            placeholder: "Silahkan Pilih Vendor",
+            allowClear: true
+        });
+        $("#jenisReward").select2({
+            placeholder: "Silahkan Pilih Jenis Reward",
+            allowClear: true
+        });
+    </script>  
     
     
     <script type="text/javascript">
@@ -699,6 +777,44 @@ session_start();
                             $("#contactPersonReward").append("<option value='"+obj+"'>"+ nama + " - " + email + " ( " + telp + " ) " +  "</option>");
                             swal("Berhasil tambah kontak person", "", "success");
                             $("#modal-addcontactperson").modal('hide');
+                        }
+                    }
+                }); 
+            }
+        }
+        
+        
+        function addBrand() {
+            $("#brandName").val("");
+            
+            $("#modal-addbrand").modal('show');
+        }
+        function saveBrand() {
+            var nama = $("#brandName").val();
+                    
+            var isError = false;
+            
+            if (!nama) {
+                $("#val-brandName").html("Nama Brand tidak boleh kosong.");
+                isError = true;
+            }
+            
+            if (!isError) {
+                var url = "ajax/create-brand.php";
+                $.ajax({
+                    url: url,
+                    data: {
+                       nama: nama
+                    },
+                    success: function(data, textStatus, jqXHR) {
+                        var obj = $.parseJSON(data);
+                            
+                        if (obj == "0") {
+                            swal("Gagal tambah brand", "", "warning");
+                        } else {
+                            $("#brandReward").append("<option value='"+obj+"'>"+ nama +"</option>");
+                            swal("Berhasil tambah brand", "", "success");
+                            $("#modal-addbrand").modal('hide');
                         }
                     }
                 }); 

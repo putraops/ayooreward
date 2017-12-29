@@ -174,8 +174,18 @@ session_start();
   
     <script type="text/javascript">
        $(document).ready(function(){
-            $('#myTable').DataTable();
-            //$("#modalEditBarang").modal('show');
+            var defaultDatatableReward;
+            if (localStorage.getItem("defaultDatatableJenisReward") != null) {
+                defaultDatatableReward = localStorage.getItem("defaultDatatableJenisReward");
+            } else {
+                defaultDatatableReward = 50;
+            }
+            $('#myTable').DataTable({
+                "pageLength": defaultDatatableReward
+            });
+            $("#myTable_wrapper select").change(function(){
+                localStorage.setItem("defaultDatatableJenisReward", $("#myTable_wrapper select").val());
+            });
         });
         function removeError(id){
             $("#val-" + id).html('');

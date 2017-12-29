@@ -4,14 +4,16 @@ session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
     <head>
+
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <title>Cabang - ayooreward!</title>
+        <title>Daftar Brand - ayooreward!</title>
 
         <!-- Bootstrap Core CSS -->
         <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -28,32 +30,25 @@ session_start();
         <link rel="stylesheet" href="sweetalert/dist/sweetalert.css">
 
         <style>
-            .activate, .deactivate {
-                letter-spacing: 0.5px;
-            }
-            .status-user {
-                cursor: pointer;
-            }
-            .no-status-user {
-                cursor: no-drop;
-            }
+
         </style>
     </head>
 
     <body>
-        <?php $currentpage = "user"; ?>
+        <?php $currentpage = "vendor"; ?>
 
         <!-- Navigation -->
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
             <?php require 'profile-navigation.php'; ?>
             <?php
             echo "<script>";
-            if ($read_user == "0_0") {
+            if ($read_brand == "0_0") {
                 echo "window.location.href = 'rewards';";
             }
             echo "</script>";
             ?>
         </nav>
+
         <div id="page-wrapper">
 
             <div class="container-fluid">
@@ -62,30 +57,26 @@ session_start();
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="page-header">
-                            <strong>DAFTAR CABANG</strong>
+                            <strong>DAFTAR BRAND</strong>
                         </h1>
                     </div>
                 </div>
                 <!-- /.row -->
 
                 <div class="row">
-                    <?php if ($create_user != "0_0"): ?>
+                    <?php if ($create_brand != "0_0"): ?>
                         <div class="col-lg-12">
-                            <a href="tambah-cabang" type="button" class="btn btn-info siku"><strong>+</strong> Tambah Cabang</a><br/><br/>
+                            <a href="tambah-brand" type="button" class="btn btn-info siku"><strong>+</strong> Tambah Brand</a><br/><br/>
                         </div>
                     <?php endif; ?>
-
                     <div class="col-lg-12">
                         <div class="table-responsive">
                             <table id="myTable" class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Nama</th>
-                                        <th>Kontak Person</th>
-                                        <th>Email</th>
-                                        <th>No Telp</th>
-                                        <?php if ($update_privileges != "0_0"): ?>
+                                        <th>Brand</th>
+                                        <?php if ($update_brand != "0_0" || $delete_brand != "0_0"): ?>
                                             <th>Aksi</th>
                                         <?php endif; ?>
                                     </tr>
@@ -94,37 +85,30 @@ session_start();
                                     <?php
                                     require './connection.php';
 
-                                    $sql = "SELECT id, nama, kontak_person, email, no_telp, status, created_at, updated_at "
-                                            . "FROM db_cabang "
-                                            . "WHERE status != '0' "
-                                            . "order by created_at ASC;";
+                                    $sql = "Select b.id as id, b.nama as namabrand
+                                        From db_brand b
+                                        Where isdelete = 0
+                                        order by b.created_at ASC;";
 
                                     $result = $con->query($sql);
                                     if ($result->num_rows > 0) {
                                         // output data of each row
                                         $nomor = 1;
                                         while ($row = $result->fetch_assoc()) {
-                                            //$temp = explode(" ", $row['last_login']);
-
                                             echo "<tr>";
                                             echo "<td>" . $nomor . "</td>";
-                                            echo "<td>" . ($row['nama'] == "" ? "-" : $row['nama']) . "</td>";
-                                            echo "<td>" . ($row['kontak_person'] == "" ? "-" : $row['kontak_person']) . "</td>";
-                                            echo "<td>" . ($row['email'] == "" ? "-" : $row['email']) . "</td>";
-                                            echo "<td>" . ($row['no_telp'] == "" ? "-" : $row['no_telp']) . "</td>";
+                                            echo "<td>" . $row['namabrand'] . "</td>";
 
-//                                        if ($update_privileges != "0_0" || $update_user) {
-                                            echo "<td class='text-center'>";
-
-//                                            if ($update_privileges != "0_0") {
-//                                            }
-                                            if ($update_user != "0_0") {
-                                                echo "<a href=\"edit-cabang?k=" . $row['id'] . "\"class=\"btn btn-primary btn-xs siku\">&nbsp;Ubah&nbsp;</a> ";
+                                            if ($update_brand != "0_0" || $delete_brand != "0_0") {
+                                                echo "<td class='text-center'>";
+                                                if ($update_brand != "0_0") {
+                                                    echo "<a href='edit-brand?q=" . $row['id'] . "' class=\"btn btn-primary btn-xs siku\">&nbsp;Ubah&nbsp;</a>&nbsp;";
+                                                }
+                                                if ($delete_brand != "0_0") {
+                                                    echo "<button class=\"btn btn-danger btn-xs siku\" onclick=\"deletevendor(" . $row['id'] . ")\">Hapus</button>";
+                                                }
+                                                echo "</td>";
                                             }
-                                            echo "<button class=\"btn btn-danger btn-xs siku\" onclick=\"deletecabang(" . $row['id'] . ")\">Hapus</button>";
-
-                                            echo "</td>";
-//                                        }
                                             echo "</tr>";
                                             $nomor++;
                                         }
@@ -142,8 +126,6 @@ session_start();
 
         </div>
         <!-- /#page-wrapper -->
-
-
         <!-- jQuery -->
         <script src="js/jquery.js"></script>
 
@@ -153,27 +135,33 @@ session_start();
 
         <script type="text/javascript">
             $(document).ready(function () {
-                var defaultDatatableReward = 50;
-                if (localStorage.getItem("defaultDatatableCabang") != null) {
-                    defaultDatatableReward = localStorage.getItem("defaultDatatableCabang");
+                var defaultDatatableReward;
+                if (localStorage.getItem("defaultDatatableBrand") != null) {
+                    defaultDatatableReward = localStorage.getItem("defaultDatatableBrand");
+                } else {
+                    defaultDatatableReward = 50;
                 }
                 $('#myTable').DataTable({
                     "pageLength": defaultDatatableReward
                 });
                 $("#myTable_wrapper select").change(function () {
-                    localStorage.setItem("defaultDatatableCabang", $("#myTable_wrapper select").val());
+                    localStorage.setItem("defaultDatatableBrand", $("#myTable_wrapper select").val());
                 });
             });
 
-            function deletecabang(kode) {
-                if (confirm("Apakah anda yakin ingin menghapus data cabang ini?")) {
-                    var url = 'ajax/delete-cabang.php?kode=' + kode;
+            function showModalCategory() {
+                $('#modal-CategoryAction').modal('show');
+            }
+
+            function deletevendor(kode) {
+                if (confirm("Apakah anda yakin ingin menghapus brand ini?")) {
+                    var url = 'ajax/delete-brand.php?kode=' + kode;
                     $.ajax({
                         url: url,
                         success: function (data, textStatus, jqXHR) {
                             if (data == "1") {
                                 swal({
-                                    title: "Berhasil menghapus cabang",
+                                    title: "Berhasil menghapus brand",
                                     type: "success",
                                     showCancelButton: false,
                                     confirmButtonColor: "Black",
@@ -184,7 +172,7 @@ session_start();
                                 },
                                         function (isConfirm) {
                                             if (isConfirm) {
-                                                window.location.href = "cabang";
+                                                window.location.href = "brand";
                                             }
                                         });
                             }
@@ -192,11 +180,6 @@ session_start();
                     });
                 }
             }
-
-            function showModalCategory() {
-                $('#modal-CategoryAction').modal('show');
-            }
-
         </script>
 
     </body>

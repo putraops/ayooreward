@@ -3,10 +3,18 @@
         require_once('../connection.php');
         
         $id = 0;
+        $jabatan = "";
+        $cabang = "";
         $status = "";
 
         if (isset($_REQUEST["id"])) {
             $id = $con->real_escape_string($_REQUEST["id"]);
+        } 
+        if (isset($_REQUEST["jabatan"])) {
+            $jabatan = $con->real_escape_string($_REQUEST["jabatan"]);
+        } 
+        if (isset($_REQUEST["cabang"])) {
+            $cabang = $con->real_escape_string($_REQUEST["cabang"]);
         } 
         if (isset($_REQUEST["status"])) {
             $status = $con->real_escape_string($_REQUEST["status"]);
@@ -17,35 +25,92 @@
         $arrPerjalanan = array(); 
         $arrPengeluaran = array(); 
         
-        $sql = "Select dbv.kode as kodevendor, 
-                dbv.nama as namavendor, 
-                dbr.status as status, dbs.nama as statusnama, 
-                dbr.id as id,
-                dbr.no_po as nopo,
-                dbr.quartal as quartal, 
-                dbr.keterangan_reward as keterangan_reward, 
-                dbr.tanggal_buat as tanggalbuat, 
-                dbr.tanggal_selesai as tanggalselesai, 
-                dbr.tanggal_tagih as tanggaltagih, 
-                dbr.memo as memo,
-                dbjr.nama as jenisreward,
-                dbr.nama_cp as nama_cp, 
-                dbr.email_cp as email_cp, 
-                dbr.telp_cp as telp_cp,
-                c.nama as namacabang,
-                dbu.id_cabang as idcabang,
-                dbcp.id as id_tablecontactperson, 
-                dbcp.nama as nama_tablecontactperson, 
-                dbcp.email as email_tablecontactperson, 
-                dbcp.telp as telp_tablecontactperson 
-        from db_rewards dbr
-        INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
-        INNER JOIN db_status dbs ON dbr.status = dbs.kode 
-        INNER JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
-        INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward
-        LEFT JOIN db_cabang c ON c.id = dbu.id_cabang 
-        LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson
-        where dbv.kode = '$id'";
+//        $sql = "Select dbv.kode as kodevendor, 
+//                dbv.nama as namavendor, 
+//                dbb.id as idbrand, 
+//                dbb.nama as namabrand, 
+//                dbr.status as status, dbs.nama as statusnama, 
+//                dbr.id as id,
+//                dbr.no_po as nopo,
+//                dbr.quartal as quartal, 
+//                dbr.keterangan_reward as keterangan_reward, 
+//                dbr.tanggal_buat as tanggalbuat, 
+//                dbr.tanggal_selesai as tanggalselesai, 
+//                dbr.tanggal_tagih as tanggaltagih, 
+//                dbr.memo as memo,
+//                dbjr.nama as jenisreward,
+//                dbr.nama_cp as nama_cp, 
+//                dbr.email_cp as email_cp, 
+//                dbr.telp_cp as telp_cp,
+//                c.nama as namacabang,
+//                dbu.id_cabang as idcabang,
+//                dbcp.id as id_tablecontactperson, 
+//                dbcp.nama as nama_tablecontactperson, 
+//                dbcp.email as email_tablecontactperson, 
+//                dbcp.telp as telp_tablecontactperson 
+//        from db_rewards dbr
+//        LEFT JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
+//        LEFT JOIN db_brand dbb ON dbb.id = dbr.idbrand 
+//        INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
+//        INNER JOIN db_status dbs ON dbr.status = dbs.kode 
+//        INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward
+//        LEFT JOIN db_cabang c ON c.id = dbu.id_cabang 
+//        LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson
+//        where dbv.kode = '$id'";
+        
+        $sql =  "Select dbv.kode as kodevendor, 
+                        dbv.nama as namavendor, 
+                        dbb.id as idbrand, 
+                        dbb.nama as namabrand, 
+                        dbr.status as status, 
+                        dbs.nama as statusnama, 
+                        dbs.warna as kodewarna, 
+                        dbr.quartal as quartal, 
+                        dbr.id as id,
+                        dbr.no_po as nopo,
+                        dbr.keterangan_reward as keterangan_reward, 
+                        dbr.keteranganclose as keteranganclose, 
+                        dbr.tanggal_buat as tanggalbuat, 
+                        dbr.tanggal_selesai as tanggalselesai, 
+                        dbr.tanggal_tagih as tanggaltagih, 
+                        dbr.nama_cp as nama_cp, 
+                        dbr.email_cp as email_cp, 
+                        dbr.telp_cp as telp_cp, 
+                        dbr.memo as memo,
+                        dbr.kode_vendor as kode_vendor,
+                        dbr.idbrand as idbrand,
+                        dbu.name as namauser, 
+                        dbu1.name as userselesai, 
+                        dbjr.nama as jenisreward,
+                        c.nama as namacabang,
+                        dbu.id_cabang as idcabang,
+                        dbcp.id as id_tablecontactperson, 
+                        dbcp.nama as nama_tablecontactperson, 
+                        dbcp.email as email_tablecontactperson, 
+                        dbcp.telp as telp_tablecontactperson ";
+        $sql .= "From db_rewards dbr
+                 LEFT JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
+                 LEFT JOIN db_brand dbb ON dbb.id = dbr.idbrand 
+                 INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
+                 LEFT JOIN db_user dbu1 ON dbu1.kode = dbr.user_selesai
+                 INNER JOIN db_status dbs ON dbr.status = dbs.kode 
+                 INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward 
+                 LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson ";
+        $sql .=  "LEFT JOIN db_cabang c ON c.id = dbr.id_cabang ";
+        $sql .=  "WHERE dbr.isDelete = 0 ";
+        
+        
+        if ($id != "0") {
+            $sql .= "AND dbv.kode = '$id'";
+        } 
+        
+        if ($jabatan == "admin") {
+            ## Do Nothing
+        } else {
+            if ($cabang != "0") {
+                $sql .= "AND dbr.id_cabang = '$cabang' ";
+            }
+        }
         
         //echo $sql;
         
@@ -67,6 +132,8 @@
                         'id' => $row['id'],
                         'kodevendor' => $row['kodevendor'],
                         'namavendor' => $row['namavendor'],
+                        'idbrand' => $row['idbrand'],
+                        'namabrand' => $row['namabrand'],
                         'status' => $row['status'],
                         'statusnama' => $row['statusnama'],
                         'nopo' => $row['nopo'],

@@ -43,6 +43,8 @@ $out = "";
 
 $sql = "Select dbv.kode as kodevendor, 
                 dbv.nama as namavendor, 
+                dbb.id as idbrand, 
+                dbb.nama as namabrand, 
                 dbr.status as status, 
                 dbs.nama as statusnama, 
                 dbr.id as id,
@@ -64,14 +66,15 @@ $sql = "Select dbv.kode as kodevendor,
                 dbcp.nama as nama_tablecontactperson, 
                 dbcp.email as email_tablecontactperson, 
                 dbcp.telp as telp_tablecontactperson 
-        from db_rewards dbr
+        FROM db_rewards dbr
+        LEFT JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
+        LEFT JOIN db_brand dbb ON dbb.id = dbr.idbrand 
         INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
         INNER JOIN db_status dbs ON dbr.status = dbs.kode 
-        INNER JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
         INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward 
         LEFT JOIN db_cabang c ON c.id = dbu.id_cabang 
         LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson
-        where dbr.id = '$id'";
+        WHERE dbr.isdelete = 0 AND dbr.id = '$id'";
 
 $result = $con->query($sql);
 
@@ -103,6 +106,8 @@ if ($result->num_rows > 0) {
             'id' => $row['id'],
             'kodevendor' => $row['kodevendor'],
             'namavendor' => $row['namavendor'],
+            'idbrand' => $row['idbrand'],
+            'namabrand' => $row['namabrand'],
             'status' => $row['status'],
             'statusnama' => $row['statusnama'],
             'nopo' => $row['nopo'],

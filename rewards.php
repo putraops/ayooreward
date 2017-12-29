@@ -177,12 +177,17 @@
 
         $tipereward = isset($_GET['tipereward']) ? $con->real_escape_string($_REQUEST['tipereward']) : '';
         $cabangreward = isset($_GET['cabangreward']) ? $con->real_escape_string($_REQUEST['cabangreward']) : '';
+        $vendorreward = isset($_GET['vendorreward']) ? $con->real_escape_string($_REQUEST['vendorreward']) : '';
+        $brandreward = isset($_GET['brandreward']) ? $con->real_escape_string($_REQUEST['brandreward']) : '';
         $statusfilter = isset($_GET['status']) ? $con->real_escape_string($_REQUEST['status']) : '';
         $quartalReward = isset($_GET['quartal']) ? $con->real_escape_string($_REQUEST['quartal']) : '';
+        $filter = isset($_GET['filter']) ? $con->real_escape_string($_REQUEST['filter']) : '';
         
         $backcolor = "";
         $sql =  "Select dbv.kode as kodevendor, 
                         dbv.nama as namavendor, 
+                        dbb.id as idbrand, 
+                        dbb.nama as namabrand, 
                         dbr.status as status, 
                         dbs.nama as statusnama, 
                         dbs.warna as kodewarna, 
@@ -190,6 +195,7 @@
                         dbr.id as id,
                         dbr.no_po as nopo,
                         dbr.keterangan_reward as keterangan_reward, 
+                        dbr.keteranganclose as keteranganclose, 
                         dbr.tanggal_buat as tanggalbuat, 
                         dbr.tanggal_selesai as tanggalselesai, 
                         dbr.tanggal_tagih as tanggaltagih, 
@@ -197,6 +203,8 @@
                         dbr.email_cp as email_cp, 
                         dbr.telp_cp as telp_cp, 
                         dbr.memo as memo,
+                        dbr.kode_vendor as kode_vendor,
+                        dbr.idbrand as idbrand,
                         dbu.name as namauser, 
                         dbu1.name as userselesai, 
                         dbjr.nama as jenisreward,
@@ -207,40 +215,54 @@
                         dbcp.email as email_tablecontactperson, 
                         dbcp.telp as telp_tablecontactperson ";
         $sql .= "From db_rewards dbr
+                 LEFT JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
+                 LEFT JOIN db_brand dbb ON dbb.id = dbr.idbrand 
                  INNER JOIN db_user dbu ON dbu.kode = dbr.id_user 
                  LEFT JOIN db_user dbu1 ON dbu1.kode = dbr.user_selesai
                  INNER JOIN db_status dbs ON dbr.status = dbs.kode 
-                 INNER JOIN db_vendor dbv ON dbv.kode = dbr.kode_vendor 
                  INNER JOIN db_jenis_reward dbjr ON dbjr.id = dbr.id_jenis_reward 
                  LEFT JOIN db_contactperson dbcp ON dbcp.id = dbr.id_contactperson ";
-        $sql .=  "LEFT JOIN db_cabang c ON c.id = dbu.id_cabang ";
+        $sql .=  "LEFT JOIN db_cabang c ON c.id = dbr.id_cabang ";
         $sql .=  "WHERE dbr.isDelete = 0 AND dbs.isDelete = 0 ";
         
-        
-        
-        if ($firstdate && $lastdate) {
-            $sql .= "and dbr.tanggal_buat between '$firstdate' AND '$lastdate' ";
-        }
-        if ($tipereward && $tipereward != "0") {
-            $sql .= "and dbr.id_jenis_reward = '$tipereward' ";
-        }
-        if ($statusfilter && $statusfilter != "0") {
-            $sql .= "and dbs.kode = '$statusfilter' ";
-        }
-        if ($quartalReward && $quartalReward != "") {
-            $sql .= "and dbr.quartal = '$quartalReward' ";
-        }
-        if ($cabangreward && $cabangreward != "0") {
-            $sql .= "and dbu.id_cabang = '$cabangreward' ";
-        }
-        
+        ## Akses
         if ($jabatanUserLogin == "admin") {
             ## Do Nothing
         } else {
             if ($cabangUserLogin != "0") {
-                $sql .= "and dbu.id_cabang = '$cabangUserLogin' ";
+                $sql .= "and dbr.id_cabang = '$cabangUserLogin' ";
             }
+        }        
+        
+        ## Filter
+        if ($filter == "true") {
+            if ($firstdate && $lastdate) {
+                $sql .= "and dbr.tanggal_buat between '$firstdate' AND '$lastdate' ";
+            }
+            if ($tipereward && $tipereward != "0") {
+                $sql .= "and dbr.id_jenis_reward = '$tipereward' ";
+            }
+            if ($statusfilter && $statusfilter != "0") {
+                $sql .= "and dbs.kode = '$statusfilter' ";
+            }
+            if ($quartalReward && $quartalReward != "") {
+                $sql .= "and dbr.quartal = '$quartalReward' ";
+            }
+            if ($cabangreward && $cabangreward != "0") {
+                $sql .= "and dbr.id_cabang = '$cabangreward' ";
+            }
+            if ($vendorreward && $vendorreward != "0") {
+                $sql .= "and dbr.kode_vendor = '$vendorreward' ";
+            }
+            if ($brandreward && $brandreward != "0") {
+                $sql .= "and dbr.idbrand = '$brandreward' ";
+            }  
+        } else {
+            ##$sql .= "and dbs.kode != '2' AND dbs.kode != '3' ";
         }
+        
+        //        echo $cabangUserLogin;exit;
+        
         
         
         //$sql .= "and dbr.id = '51' ";
@@ -249,7 +271,7 @@
         
         //$sql .=  "LIMIT 3";
         
-        //Echo $sql; exit;
+        //echo $sql; exit;
         
         $result = $con->query($sql);
         
@@ -290,10 +312,18 @@
                 $tempfile .= '"reward": "'. $row['jenisreward'] . ' <br/>Detail: ' . ($row['keterangan_reward']) .'",';
                 $tempfile .= '"detailreward": "'. $row['keterangan_reward'].'",';
                 $tempfile .= '"namavendor": "<span class=\'hyperlink\' style=\'color: blue;\' onclick=\"showdetail('. $row['id'] .', '. $row['kodevendor'] .', \'itemvendor\')\">'.$row['namavendor'].'</span>",';
+                $tempfile .= '"namabrand": "'.$row['namabrand'].'",';
                 $tempfile .= '"status": "'.$row['status'].'",';
                 $tempfile .= '"kodewarna": "'.$row['kodewarna'].'",';
                 $tempfile .= '"userselesai": "'.$row['userselesai'].'",';
                 $tempfile .= '"keterangan": "'.$row['memo'].'",';
+                $tempfile .= '"keteranganclose": "'.$row['keteranganclose'].'",';
+                
+//                if ($row['keteranganclose'] == "") {
+//                    $tempfile .= '"keteranganclose": "",';
+//                } else {
+//                    $tempfile .= '"keteranganclose": "'.$row['keteranganclose'].'",';
+//                }
                 
                 if ($row['namacabang'] == "") {
                     $tempfile .= '"cabang": "Semua Cabang",';
@@ -464,7 +494,49 @@
                                         </select>
                                     </div>
                                 <?php endif; ?>
-                                
+                                <div class="form-group">
+                                    <label>Vendor: </label>
+                                    <select id="vendorReward" name="vendorReward" onchange="removeError(this.id)" style="padding: 8px;">
+                                        <option value="0">Semua Vendor</option>
+                                        <?php
+                                        //require './connection.php';
+                                        $sql = "SELECT kode, nama, email, telp, alamat, keterangan, status_hapus, created_at, updated_at 
+                                                FROM db_vendor 
+                                                Where status_hapus = 0 
+                                                order by nama ASC;"; 
+                                         
+                                        $result = $con->query($sql);
+                                        if ($result->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $result->fetch_assoc()) {
+                                                $row['kode'] == $vendorreward ? $selected = "selected" : $selected = ""; 
+                                                echo "<option " . $selected . " value='". $row['kode'] ."'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Brand: </label>
+                                    <select id="brandReward" name="brandReward" onchange="removeError(this.id)" style="padding: 8px;">
+                                        <option value="0">Semua Brand</option>
+                                        <?php
+                                        //require './connection.php';
+                                        $sql = "SELECT id, nama  FROM db_brand Where isDelete = 0 order by nama ASC;"; 
+                                         
+                                        $result = $con->query($sql);
+                                        if ($result->num_rows > 0) {
+                                            // output data of each row
+                                            $selected = "";
+                                            while ($row = $result->fetch_assoc()) {
+                                                $row['id'] == $brandreward ? $selected = "selected" : $selected = ""; 
+                                                echo "<option " . $selected . " value='". $row['id'] ."'>" . $row['nama'] . "</option>";
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
                                 <div class="form-group">
                                     <label>Quartal: </label>
                                     <select id="quartalReward" name="quartalReward" onchange="removeError(this.id)" style="padding: 8px;">
@@ -475,7 +547,6 @@
                                         <option value="Q4" <?php echo $quartalReward == "Q4" ? 'selected=\"true\"': ""; ?>>Q4</option>
                                     </select>
                                 </div>
-                                
                                 <button type="button" class="btn btn-default siku" onclick="showlist()">Tampilkan</button>
                             </form>
                         </div>
@@ -497,6 +568,7 @@
                                         <th>REWARD</th>
     <!--                                    <th>KETERANGAN</th>-->
                                         <th>VENDOR</th>
+                                        <th>BRAND</th>
                                         <th>CONTACT PERSON</th>
                                         <th style="width: 120px;">STATUS</th>
                                         <th>AKSI</th>
@@ -555,34 +627,46 @@
                                 <label>Quartal: </label>
                                 <span class="text-uppercase" id="quartal"></span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Nama Reward:</label>
-                                    <div id="document-referral">-</div>
+                            <div class="col-md-12" style="margin-top: 15px;">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Nama Reward:</label>
+                                            <div id="document-referral">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Vendor:</label>
+                                            <div id="vendor">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Brand:</label>
+                                            <div id="brand">-</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Vendor:</label>
-                                    <div id="vendor">-</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Contact Person:</label>
-                                    <div id="contactperson">-</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Reward:</label>
-                                    <div id="reward">-</div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Keterangan:</label>
-                                    <div id="keterangan">-</div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Reward:</label>
+                                            <div id="reward">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Contact Person:</label>
+                                            <div id="contactperson">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Keterangan:</label>
+                                            <div id="keterangan">-</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -639,8 +723,9 @@
                             <thead> 
                                 <tr> 
                                     <th>No</th>
-                                    <th>Cabang</th>
                                     <th>Tanggal Input</th>
+                                    <th>Cabang</th>
+                                    <th>Brand</th>
                                     <th>Quartal</th>
                                     <th>Nama Reward</th>
                                     <th>Reward</th>
@@ -669,8 +754,8 @@
                     </div>
                     <div class="modal-body" style="font-size: 12pt; letter-spacing: 1px; color: #666;">
                         <div class="form-group col-md-12">
-                            <label>Status</label>
-                            <select class="form-control" class="cbo-status-invoice" id="status-invoice" onclick="removeErrorText(this.id)">
+                            <label>Status: </label>
+                            <select class="form-control" class="cbo-status-invoice" id="status-invoice" onchange="toogleketerangan();" onclick="removeErrorText(this.id)">
                                 <option value="0">Pilih Status</option>
                                 <?php
                                     $sql = "Select kode, nama from db_status WHERE no_urut != 0 AND isDelete = 0 ORDER BY no_urut ASC";                            
@@ -692,9 +777,13 @@
                             </select>
                             <i class="validation-text" id="val-status-invoice" style="letter-spacing: 0px;"></i>
                         </div>
+                        <div class="col-md-12 form-group" id="form-status-keterangan" style="display: none;">
+                            <label>Keterangan: </label>
+                            <input type="text" class="form-control" id="status-keterangan" style="resize: none;">
+                        </div>
                         <div class="text-right" style="padding: 15px;">
                             <button type="button" class="btn btn-default siku" data-dismiss="modal"> Batal </button>
-                            <button type="button" class="btn btn-primary siku" onclick="ubahstatusbeli()" style="width: 70px;"> Ubah </button>
+                            <button type="button" class="btn btn-primary siku" onclick="ubahstatusreward()" style="width: 70px;"> Ubah </button>
                         </div>
                     </div>
                 </div><!-- /.modal-content -->
@@ -725,8 +814,14 @@
                 console.log(localStorage.getItem('session_login_role_ayooklik'));
                
                 arrayStatus = <?php echo json_encode($arrayStatus);?>;              
-//contactperson
+                
+                var defaultDatatableReward = 50;
+                
+                if (typeof(Storage) !== "undefined") {
+                    defaultDatatableReward = localStorage.getItem("defaultDatatableReward");
+                }
                 table = $('#example').DataTable({
+                    "pageLength": defaultDatatableReward,
                     "ajax": "datatables/objects.txt",
                     "columns": [
                             {
@@ -743,6 +838,7 @@
                             { "className": 'td-control', "data": "documentreferral" },
                             { "className": 'td-control', "data": "reward" },
                             { "className": 'td-control', "data": "namavendor" },
+                            { "className": 'td-control', "data": "namabrand" },
                             { "className": 'td-control', "data": "contactperson" },
                             { "className": 'td-control text-center', "data": "statusname" },
                             { "data": "btndelete" 
@@ -759,6 +855,10 @@
                     
                 });
                 
+                $("#example_wrapper select").change(function(){
+                    //alert();
+                    localStorage.setItem("defaultDatatableReward", $("#example_wrapper select").val());
+                }); 
                 //table.ajax.reload();
                 
                 //table.fnDraw();
@@ -767,21 +867,24 @@
                 function format (d) {
                 // `d` is the original data object for the row
                     console.log(d.createddate);
+                    
                     var temp =  '<div class="col-md-6"><strong>Keterangan: </strong>';
                     if (d.status != 2 && d.status != 3) {
                         temp += '<input type="button" id="btn-memo-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'UbahSimpan\')" class="btn btn-primary btn-xs siku" value="Ubah" style="margin-bottom: 3px;" /> <input type="button" id="btn-memo-batal-'+ d.id + '" onclick="toogleMemo('+ d.id +', \'Batal\')" class="btn btn-danger btn-xs siku" value="Batal" style="margin-bottom: 3px; visibility: hidden;" />';
                     }
-                            temp += '<input type="hidden" id="temp-memo-' + d.id + '" value="' + d.keterangan + '" />' +
-                            '<br/><span id="memo-' + d.id + '">' + d.keterangan + '</span>' +
-                            '</div>';
-                            '</div>' +
-                    '';
+                    temp += '<input type="hidden" id="temp-memo-' + d.id + '" value="' + d.keterangan + '" />';
+                    temp += '<br/><span id="memo-' + d.id + '">' + d.keterangan + '</span>';
+                    temp += '<br/><br/>';
+                    temp += '<span id="ketclose-' + d.id + '">' + d.keteranganclose + '</span>';
+                    temp += '</div>';
+                    temp += '</div>';;
             
                     return temp;
                 }
                 // Add event listener for opening and closing details
                 $('#example').on('click', 'td', function (e) {
                     //console.log(e.target.className);
+                    //alert();
                     if (e.target.className === " td-control" || e.target.className === "td-control sorting_1" || e.target.className === " details-control") {
                         //alert();
                         var tr = $(this).closest('tr');
@@ -879,6 +982,7 @@
                             $("#modal-information-by-reward #reward").html(data.jenisreward + "<br /> <i>" + data.keterangan_reward + "</i>");
                             $("#modal-information-by-reward #contactperson").html("Nama: <strong>" + data.nama_cp + "</strong><br />Email: <strong>" + data.email_cp + "</strong><br /> Telp: <strong>" + data.telp_cp + "</strong>" );
                             $("#modal-information-by-reward #vendor").html(data.namavendor);
+                            $("#modal-information-by-reward #brand").html(data.namabrand);
                             $("#modal-information-by-reward #keterangan").html(data.memo === "" ? "-" : data.memo);
                             
                             console.log(obj.HistoryStatus);
@@ -940,12 +1044,28 @@
                 }); 
             }            
             
-            function ubahstatusbeli() {
+            
+            function toogleketerangan() {
+                var status = $("#status-invoice").val();
+                if (status == "2" || status == "3") {
+                    $("#form-status-keterangan").css("display", "block");
+                } else {
+                    $("#form-status-keterangan").css("display", "none");
+                }
+            }
+            function ubahstatusreward() {
 //                console.log(indextable);
 //                console.log(tablerow);
 //                console.log($(tablerow));
                 var usernamelogin = localStorage.getItem('session_login_id_ayooklik');
                 var status = $("#status-invoice").val();
+                var statusketerangan = "";
+                if (status == "2" || status == "3") {
+                    statusketerangan = $("#status-keterangan").val();
+                }
+//console.log(usernamelogin);
+//console.log(status);
+//console.log(idstatuschange);
                 var statusname = $("#status-invoice option:selected").text();
 
                 if (status === "0") {
@@ -957,6 +1077,7 @@
                         data: {
                            kode: idstatuschange,
                            status: status,
+                           keterangan: statusketerangan,
                            usernamelogin: usernamelogin
                         },
                         success: function(data, textStatus, jqXHR) {
@@ -969,8 +1090,9 @@
                                 }
                                 temp += ">" + statusname;
                                 temp += "</span>";
-                                table.cell(indextable, 9).data(temp).draw();  
+                                table.cell(indextable, 10).data(temp).draw();  
                                 
+                                $("#ketclose-" + idstatuschange).html(statusketerangan);;
                                 console.log("#" + rewardid);
                                 
                                 warna = data;
@@ -1019,8 +1141,17 @@
 
             function showdetail(id, param, act) {
                 if (act === "itemstatus") {
+                    if (param == "2" || param == "3") {
+                        $("#modal-change-status #form-status-keterangan").css("display", "block");
+                    } else {
+                        $("#modal-change-status #form-status-keterangan").css("display", "none");
+                    }
+                    
                     $("#modal-change-status select option").removeAttr("selected");
                     $("#modal-change-status .modal-title").html("UBAH STATUS REWARD");
+                    
+                    
+                    
                     $("#modal-change-status #status-invoice #status-" + param).prop("selected", true);
                     $('#modal-change-status').modal('show');
                 } else if (act === "itemvendor") {
@@ -1030,6 +1161,8 @@
                         url: 'ajax/select-reward-by-vendor.php',
                         data: {
                            id: param,
+                           jabatan: '<?php echo $jabatanUserLogin;?>',
+                           cabang: '<?php echo $cabangUserLogin;?>'
                         },
                         success: function(data, textStatus, jqXHR) {
                             var obj = $.parseJSON(data);
@@ -1040,6 +1173,8 @@
                             if (data === 0) {
                                 $("#modal-information-by-vendor .modal-body").html("tidak ada data pembelian");
                             } else {
+                                
+                                var temp = "";
                                 for (var i = 0; i < obj.Data.length; i++){
                                     $("#modal-information-by-vendor .modal-title").html("Daftar Pembelian dari vendor " + obj.Data[i]["namavendor"]);
                                     
@@ -1047,28 +1182,29 @@
                                     $("#v-pic-email").text(obj.Data[i]["email_cp"]);
                                     $("#v-pic-telp").text(obj.Data[i]["telp_cp"]);
                                     
-                                    var temp = "";
                                     temp += "<tr>";
                                     temp += "<td>" + (i+1) + "</td>";
-                                    temp += "<td>" + obj.Data[i]["cabang"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["tanggalbuat"] + "</td>";
+                                    temp += "<td>" + obj.Data[i]["cabang"] + "</td>";
+                                    temp += "<td>" + obj.Data[i]["namabrand"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["quartal"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["nopo"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["jenisreward"] + "<br/>Detail: " + obj.Data[i]["keterangan_reward"] + "</td>";
-                                    temp += "<td>Nama: " + obj.Data[i]["nama_cp"] + "<br/>Email" + obj.Data[i]["email_cp"] + "<br/>Telp" + obj.Data[i]["telp_cp"] + "</td>";
+                                    temp += "<td>Nama: " + obj.Data[i]["nama_cp"] + "<br/>Email: " + obj.Data[i]["email_cp"] + "<br/>Telp: " + obj.Data[i]["telp_cp"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["statusnama"] + "</td>";
                                     temp += "<td>" + obj.Data[i]["memo"] + "</td>";
                                     temp += "</tr>";
                                     
-                                    if (idcabanguserlogin === "0") {
-                                        print += temp;
-                                    } else if (idcabanguserlogin === obj.Data[i]["idcabang"]) {
-                                        print += temp;
-                                    }
+//                                    if (idcabanguserlogin === "0") {
+//                                        print += temp;
+//                                    } else if (idcabanguserlogin === obj.Data[i]["idcabang"]) {
+//                                        
+//                                    }
+//print += temp;
             
                                     
                                 }
-                                $("#table-body-vendor").html(print);
+                                $("#table-body-vendor").html(temp);
                             } 
                             $('#modal-information-by-vendor').modal('show');
                         },
@@ -1147,6 +1283,8 @@
                 var status = $("#status-filter").val();
                 var quartalReward = $("#quartalReward").val();
                 var cabangReward = $("#cabangReward").val();
+                var vendorReward = $("#vendorReward").val();
+                var brandReward = $("#brandReward").val();
                 
                 if (cabangReward == undefined) {
                     cabangReward = "0";
@@ -1161,6 +1299,12 @@
                 }
                 if (quartalReward != "") {
                     url += "&quartal=" + quartalReward;
+                }
+                if (vendorReward != "0") {
+                    url += "&vendorreward=" + vendorReward;
+                }
+                if (brandReward != "0") {
+                    url += "&brandreward=" + brandReward;
                 }
                 if (cabangReward != "0") {
                     url += "&cabangreward=" + cabangReward;

@@ -3,16 +3,17 @@
     //$id = $con->real_escape_string($_REQUEST["id"]);
     $id = $con->real_escape_string($_REQUEST["kode"]);
     $status = $con->real_escape_string($_REQUEST["status"]);
+    $keterangan = htmlspecialchars($con->real_escape_string($_REQUEST["keterangan"]));
     $user  = $con->real_escape_string($_REQUEST["usernamelogin"]);
     
     function print_tanggal($tanggal) {
         $split = explode('-', $tanggal);
         return $split[2] . '/' . $split[1] . '/' . $split[0];
     }
-  
-    $sql = "UPDATE db_rewards SET user_selesai = '$user', status = '$status', ";
+    
+   $sql = "UPDATE db_rewards SET user_selesai = '$user', status = '$status', ";
     if ($status == "2" || $status == "3") {
-        $sql .= "tanggal_selesai = now(), ";
+        $sql .= "tanggal_selesai = now(), keteranganclose = '$keterangan', ";
     }
     $sql .= "updated_at = now() WHERE id = '$id';";
     

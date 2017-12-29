@@ -239,7 +239,18 @@ session_start();
                                 }
 
                                 $(document).ready(function () {
-                                    $('#myTable').DataTable();
+                                    var defaultDatatableReward;
+                                    if (localStorage.getItem("defaultDatatableUser") != null) {
+                                        defaultDatatableReward = localStorage.getItem("defaultDatatableUser");
+                                    } else {
+                                        defaultDatatableReward = 50;
+                                    }
+                                    $('#myTable').DataTable({
+                                        "pageLength": defaultDatatableReward
+                                    });
+                                    $("#myTable_wrapper select").change(function () {
+                                        localStorage.setItem("defaultDatatableUser", $("#myTable_wrapper select").val());
+                                    });
                                 });
 
                                 function deleteuser(kode) {
