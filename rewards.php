@@ -829,9 +829,11 @@
                 
                 var defaultDatatableReward = 50;
                 
-                if (typeof(Storage) !== "undefined") {
+                if (localStorage.getItem("defaultDatatableReward") != null) {
                     defaultDatatableReward = localStorage.getItem("defaultDatatableReward");
                 }
+                
+                
                 table = $('#example').DataTable({
                     "pageLength": defaultDatatableReward,
                     "ajax": "datatables/objects.txt",
