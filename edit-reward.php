@@ -112,6 +112,7 @@ session_start();
                         $isError = false;
                         $succeed = false;
                         $tanggalBuatRewardErr = $tanggalTagihanRewardErr = $documentReferralErr = $jenisRewardErr = $keteranganRewardErr = $vendorRewardErr = "";
+                        $keteranganCloseRewardErr = "";
                         $brandRewardErr = "";
                         $quartalRewardErr = "";
                         $contactPersonRewardErr = "";
@@ -122,7 +123,9 @@ session_start();
                                 dbv.nama as namavendor, 
                                 dbb.id as idbrand, 
                                 dbb.nama as namabrand, 
-                                dbr.status as status, dbs.nama as statusnama, 
+                                dbr.status as status, 
+                                dbs.nama as statusnama, 
+                                dbs.warna as statuswarna, 
                                 dbr.id as id,
                                 dbr.no_po as nopo,
                                 dbr.quartal as quartal,
@@ -132,6 +135,7 @@ session_start();
                                 dbr.tanggal_selesai as tanggalselesai, 
                                 dbr.tanggal_tagih as tanggaltagih, 
                                 dbr.memo as memo,
+                                dbr.keteranganclose as keteranganclose,
                                 dbjr.nama as jenisreward,
                                 dbr.id_jenis_reward as idreward,
                                 dbr.nama_cp as nama_cp,
@@ -164,6 +168,10 @@ session_start();
                                 $brandReward = $row['idbrand'];
                                 $tanggalTagihanReward = print_tanggal($row['tanggaltagih']);
                                 $memoReward = $row['memo'];
+                                $keteranganCloseReward = $row['keteranganclose'];
+                                $statusReward = $row['status'];
+                                $statusNamaReward = $row['statusnama'];
+                                $statusWarnaReward = $row['statuswarna'];
 
                                 $vendorNamaCP = $row['nama_cp'];
                                 $vendorEmailCP = $row['email_cp'];
@@ -203,6 +211,8 @@ session_start();
                             $memoReward = isset($_POST['memoReward']) ? preg_replace( "/\r|\n/", "", nl2br($_POST['memoReward'])) : '';
                             $memoReward = str_replace('"', '&#34;', $memoReward );
                             $memoReward = str_replace("'", '&#39;', $memoReward );
+                            
+                            $keteranganCloseReward = isset($_POST['keteranganCloseReward']) ? $_POST['keteranganCloseReward'] : '';
 
                             $vendorNamaCP = isset($_POST['vendorNamaCP']) ? $_POST['vendorNamaCP'] : '';
                             $vendorEmailCP = isset($_POST['vendorEmailCP']) ? $_POST['vendorEmailCP'] : '';
@@ -266,6 +276,7 @@ session_start();
                                         tanggal_buat = '$tanggalBuatReward_new',
                                         tanggal_tagih = '$tanggalTagihanReward_new',
                                         memo = '$memoReward',
+                                        keteranganclose = '$keteranganCloseReward',
                                         id_contactperson = '$contactPersonReward',
                                         updated_at = 'now()' 
                                         where id = '$id'";
@@ -307,6 +318,7 @@ session_start();
                                     $vendorReward = '';
                                     $tanggalTagihanReward = '';
                                     $memoReward = '';
+                                    $keteranganCloseReward = '';
 
                                     $vendorNamaCP = '';
                                     $vendorEmailCP = '';
@@ -578,6 +590,25 @@ if ($tanggalTagihanRewardErr) {
                                             }
                                             ?>
                                     </div>
+                                    
+                                    <?php $displaystatus = "block";?>
+                                    <?php if ($statusReward == "2" || $statusReward == "3"):?>
+                                    <?php $displaystatus = "none";?>
+                                    <div class="col-md-12" style="display: <?php $displaystatus;?>; margin-bottom: 5px; margin-top: 15px;">
+                                        <span style="background-color: #<?php echo $statusWarnaReward;?>; font-size: 17pt;"><strong>&nbsp;Status: <?php echo $statusNamaReward;?>&nbsp;</strong></span>
+                                    </div>
+                                      <div class="col-md-12" style="display: <?php $displaystatus;?>">
+                                        <div class="form-group">
+                                            <label>Keterangan Close</label>
+                                            <input class="form-control" name="keteranganCloseReward" id="keteranganCloseReward" onkeyup="removeError(this.id)" placeholder="Keterangan Close" value="<?php echo $keteranganCloseReward; ?>">
+                                            <?php
+                                            if ($keteranganCloseRewardErr) {
+                                                echo "<i class=\"validation-text\" id=\"val-keteranganCloseReward\">" . $keteranganCloseRewardErr . "</i>";
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <?php endif;?>
                                     <div class="form-group col-md-12" style="margin-top: 0px;">
                                         <button type="submit" class="btn btn-primary siku full-width" name="submit" ><i class="fa fa-save"> </i> Simpan</button>
                                     </div>
